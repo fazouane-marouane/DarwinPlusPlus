@@ -11,7 +11,7 @@ before_script:
   - sudo apt-get update -qq
   - if [ "$CXX" = "g++" ]; then sudo apt-get -qq install gcc-5; fi
   - if [ "$CXX" = "g++" ]; then export CXX="g++-5" CC="gcc-5"; fi
-  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 90
+  - if [ "$CXX" = "g++" ]; then sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5.1 90; fi
   - sudo apt-get install -qq libboost-all-dev
   - mkdir build
   - cd build
