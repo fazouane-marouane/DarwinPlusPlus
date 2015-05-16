@@ -1,0 +1,18 @@
+language: cpp
+
+compiler:
+  - gcc
+  - clang
+
+before_script:
+  - mkdir build
+  - cd build
+  - cmake ..
+
+script: make
+
+os:
+  - linux
+  - osx
+
+osx_image: xcode61
