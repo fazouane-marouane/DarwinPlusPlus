@@ -27,4 +27,4 @@ os:
 
 env:
   global:
-    - GCC_VERSION="5.1"
+    - GCC_VERSION="4.9"
