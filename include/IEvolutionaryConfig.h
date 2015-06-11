@@ -18,9 +18,9 @@ namespace Darwin
 		class IStandardEvolutionarConfig: IEvolutionaryConfig
 		{
 		public:
-			typedef Individual individual_type; // turn this into a c++11 Type aliase
-			typedef Population population_type;
-			using container_of_reference = std::list<std::reference_wrapper<Individual>>; // TODO: lame naming
+			using individual_type = Individual;
+			using population_type = Population;
+			using individuals_references = std::list<std::reference_wrapper<Individual>>; // TODO: lame naming
 
 			virtual IEvolutionaryConfig& init()
 			{
@@ -34,23 +34,24 @@ namespace Darwin
 				auto newIndividuals = crossOver(selectForCrossOver(population));
 				// Mutation
 				auto mutants = mutate(selectForMutation(population));
-				// NaturalSelection
-				population.add(newIndividuals, mutants);
+				// Merge these new individuals into the original population
+				population.add(newIndividuals, mutants); // TODO: sort this, somehow
+				// Natural selection
 				population.remove(selectForRemoval(population));
 				return *this;
 			}
 
-			virtual container_of_reference selectForCrossOver(population_type&) = 0;
+			virtual individuals_references selectForCrossOver(population_type&) = 0;
 
-			virtual container_of_reference selectForMutation(population_type&) = 0;
+			virtual individuals_references selectForMutation(population_type&) = 0;
 
-			virtual container_of_reference selectForRemoval(population_type&) =0;
+			virtual individuals_references selectForRemoval(population_type&) =0;
 
 			virtual void initializePopulation(population_type&) =0;
 
-			virtual population_type crossOver(container_of_reference&) =0;
+			virtual population_type crossOver(individuals_references&) =0;
 
-			virtual population_type mutate(container_of_reference&) =0;
+			virtual population_type mutate(individuals_references&) =0;
 
 		protected:
 			population_type population;
