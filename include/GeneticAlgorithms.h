@@ -3,5 +3,5 @@
 
 namespace Darwin
 {
-	void evolve(Interfaces::IEvolutionaryConfig&);
+	Interfaces::IEvolutionaryConfig& GeneticAlgorithmLoop(Interfaces::IEvolutionaryConfig&);
 }

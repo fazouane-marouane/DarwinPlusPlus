@@ -3,6 +3,12 @@
 
 using namespace Darwin::Interfaces;
 
-void Darwin::evolve(IEvolutionaryConfig&)
+IEvolutionaryConfig& Darwin::GeneticAlgorithmLoop(IEvolutionaryConfig& config)
 {
+	config.init();
+	while(! config.goalReached())
+	{
+		config.breed();
+	}
+	return config;
 }
