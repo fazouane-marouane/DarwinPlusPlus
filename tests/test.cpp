@@ -5,5 +5,5 @@
 
 BOOST_AUTO_TEST_CASE(PassTest)
 {
-    //BOOST_CHECK_EQUAL(4, sqr(2));
+	//BOOST_CHECK_EQUAL(4, 2);
 }

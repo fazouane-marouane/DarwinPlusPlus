@@ -1,10 +1,13 @@
 include_directories (${DarwinPP_SOURCE_DIR}/include)
 
-file(GLOB Darwin_SRC
+file(GLOB_RECURSE Darwin_INC
+    "${DarwinPP_SOURCE_DIR}/include/*.h"
+    "${DarwinPP_SOURCE_DIR}/include/*.cpp"
+)
+
+file(GLOB_RECURSE Darwin_SRC
     "*.h"
     "*.cpp"
 )
 
-add_library (Darwin ${Darwin_SRC})
-#add_executable (demo main.cpp)
-#target_link_libraries (demo Sqr)
+add_library (Darwin ${Darwin_INC} ${Darwin_SRC})
