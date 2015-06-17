@@ -7,15 +7,15 @@ compiler:
 sudo: true
 
 before_script:
-  - if [ "$CXX" == "g++" ]; then export GCC_VERSION="4.9"
-  - if [ "$CXX" == "g++" ]; then sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi
-  - if [ "$CXX" == "clang++" ]; then sudo add-apt-repository -y ppa:h-rayflood/llvm; fi
-  - sudo apt-get update -qq
-  - if [ "$CXX" == "g++" ]; then sudo apt-get install -qq g++-${GCC_VERSION}; fi
-  - if [ "$CXX" == "g++" ]; then sudo apt-get install -qq gcc-${GCC_VERSION}; fi
-  - if [ "$CXX" == "g++" ]; then sudo ln -s -v -f $(which g++-${GCC_VERSION}) /usr/bin/g++; fi
-  - if [ "$CXX" == "g++" ]; then sudo ln -s -v -f $(which gcc-${GCC_VERSION}) /usr/bin/gcc; fi
-  - sudo apt-get install -qq libboost-all-dev
+  - if [ "$TRAVIS_OS_NAME"=="linux" && "$CXX" == "g++" ]; then export GCC_VERSION="4.9"; fi
+  - if [ "$TRAVIS_OS_NAME"=="linux" && "$CXX" == "g++" ]; then sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi
+  - if [ "$TRAVIS_OS_NAME"=="linux" && "$CXX" == "clang++" ]; then sudo add-apt-repository -y ppa:h-rayflood/llvm; fi
+  - if [ "$TRAVIS_OS_NAME"=="linux" ] sudo apt-get update -qq
+  - if [ "$TRAVIS_OS_NAME"=="linux" && "$CXX" == "g++" ]; then sudo apt-get install -qq g++-${GCC_VERSION}; fi
+  - if [ "$TRAVIS_OS_NAME"=="linux" && "$CXX" == "g++" ]; then sudo apt-get install -qq gcc-${GCC_VERSION}; fi
+  - if [ "$TRAVIS_OS_NAME"=="linux" && "$CXX" == "g++" ]; then sudo ln -s -v -f $(which g++-${GCC_VERSION}) /usr/bin/g++; fi
+  - if [ "$TRAVIS_OS_NAME"=="linux" && "$CXX" == "g++" ]; then sudo ln -s -v -f $(which gcc-${GCC_VERSION}) /usr/bin/gcc; fi
+  - if [ "$TRAVIS_OS_NAME"=="linux" ] sudo apt-get install -qq libboost-all-dev
   - mkdir build
   - cd build
   - cmake --version
@@ -25,7 +25,12 @@ script: make && ctest
 
 os:
   - linux
+  - osx
 
 env:
   - BUILD_TYPE=Debug
   - BUILD_TYPE=Release
+
+matrix:
+  allow_failures:
+    - os: osx
