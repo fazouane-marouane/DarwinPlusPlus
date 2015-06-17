@@ -18,9 +18,9 @@ before_script:
   - mkdir build
   - cd build
   - cmake --version
-  - cmake ..
+  - cmake .. --config ${BUILD_TYPE}
 
-script: make
+script: make && ctest
 
 os:
   - linux
@@ -28,3 +28,5 @@ os:
 env:
   global:
     - GCC_VERSION="4.9"
+  - BUILD_TYPE=Debug
+  - BUILD_TYPE=Release
