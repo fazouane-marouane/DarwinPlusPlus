@@ -37,7 +37,7 @@ else()
       message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
   endif()
 
-  if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
     # using Clang
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Weverything")
   elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
