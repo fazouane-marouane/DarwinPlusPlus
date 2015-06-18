@@ -8,9 +8,11 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 file(COPY include DESTINATION ${CMAKE_BINARY_DIR})
 
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+if(CHECK_CXX_COMPILER_USED1)
+
+elseif("${CMAKE_CXX_COMPILER_ID}x" STREQUAL "MSVCx")
   # using Visual Studio C++
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+elseif("${CMAKE_CXX_COMPILER_ID}x" STREQUAL "Intelx")
   # using Intel C++
 else()
   # GCC or Clang
@@ -35,18 +37,18 @@ else()
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
   else()
       message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
-  endif()
+  endif(COMPILER_SUPPORTS_CXX17)
 
-  if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+  if(CHECK_CXX_COMPILER_USED2)
+  elseif("${CMAKE_CXX_COMPILER_ID}x" MATCHES "Clangx")
     # using Clang
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Weverything -Wno-c++98-compat")
     #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
-    
-  elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+  elseif("${CMAKE_CXX_COMPILER_ID}x" STREQUAL "GNUx")
     # using GCC
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic")
-  endif()
-endif()
+  endif(CHECK_CXX_COMPILER_USED2)
+endif(CHECK_CXX_COMPILER_USED1)
 
 
 #target_compile_features(DarwinPP PRIVATE cxx_generic_lambdas cxx_constexpr)
