@@ -17,7 +17,7 @@ namespace Darwin
 		IEvolutionaryConfig::~IEvolutionaryConfig(){}
 
 		template<class Individual, class Population>
-		class IStandardEvolutionarConfig: IEvolutionaryConfig
+		class IStandardEvolutionarConfig: public IEvolutionaryConfig
 		{
 		public:
 			using individual_type = Individual;
