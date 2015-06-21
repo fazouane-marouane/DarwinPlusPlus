@@ -42,7 +42,7 @@ public:
 		}
 		return ret;
 	}
-	uniform_distribution<int> dist; // There's a bug in VC++: uniform_int_distribution<char> is not permitted
+	uniform_distribution<int> dist;
 };
 
 
