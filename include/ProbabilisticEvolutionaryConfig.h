@@ -6,29 +6,34 @@
 
 namespace Darwin
 {
-	template<class Individual, class Population>
+	template<class ObjectifFunction, class Individual, class Population = std::vector<Individual>>
 	class ProbabilisticEvolutionaryConfig: public Interfaces::IStandardEvolutionarConfig<Individual, Population>
 	{
 		using base = Interfaces::IStandardEvolutionarConfig<Individual, Population>;
 	public:
+		// sampling: multinomial distribution
+		using base::base;
+
 		virtual typename base::individuals_references selectForCrossOver(typename base::population_type& population)
 		{
-
+			// multinomial by default
+			// other methods: Tournament, SCX
 		}
 
 		virtual typename base::individuals_references selectForMutation(typename base::population_type& population)
 		{
-
+			// uniform by default
+			// static output size
 		}
 
 		virtual typename base::individuals_references selectForRemoval(typename base::population_type& population)
 		{
-
+			// multinomial method by default
 		}
 
 		virtual void initializePopulation(typename base::population_type& population)
 		{
-
+			// distribution: uniform by default
 		}
 	private:
 		Rand::uniform_distribution<Individual> dist_crossOver;

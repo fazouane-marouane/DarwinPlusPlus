@@ -1,5 +1,6 @@
 #pragma once
 #include <list> // std::list
+#include <vector>
 #include <functional> // std::reference_wrapper
 
 namespace Darwin
@@ -16,13 +17,15 @@ namespace Darwin
 		};
 		IEvolutionaryConfig::~IEvolutionaryConfig(){}
 
-		template<class Individual, class Population>
+		template<class ObjectifFunction, class Individual, class Population= std::vector<Individual>>
 		class IStandardEvolutionarConfig: public IEvolutionaryConfig
 		{
 		public:
 			using individual_type = Individual;
 			using population_type = Population;
 			using individuals_references = std::list<std::reference_wrapper<Individual>>; // TODO: lame naming
+
+			IStandardEvolutionarConfig(ObjectifFunction _f) : f(_f) {}
 
 			virtual IEvolutionaryConfig& init()
 			{
@@ -57,6 +60,7 @@ namespace Darwin
 
 		protected:
 			population_type population;
+			ObjectifFunction f;
 		};
 	}
 }
