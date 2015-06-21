@@ -6,8 +6,8 @@
 
 namespace Darwin
 {
-	template<class ObjectifFunction, class Individual, class Population = std::vector<Individual>>
-	class ProbabilisticEvolutionaryConfig: public Interfaces::IStandardEvolutionarConfig<Individual, Population>
+	template<class GoalFunction, class Individual, class Population = std::vector<Individual>>
+	class ProbabilisticEvolutionaryConfig: public Interfaces::IStandardEvolutionarConfig<GoalFunction, Individual, Population>
 	{
 		using base = Interfaces::IStandardEvolutionarConfig<Individual, Population>;
 	public:
