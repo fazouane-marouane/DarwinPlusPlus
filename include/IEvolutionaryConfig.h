@@ -24,7 +24,7 @@ namespace Darwin
 
 			virtual IEvolutionaryConfig& init()
 			{
-				initializePopulation(population);
+				initializePopulation(Population);
 				return *this;
 			}
 
@@ -56,5 +56,13 @@ namespace Darwin
 		protected:
 			population_type population;
 		};
+        
+        class IMainStandardEvolutionarConfig: IStandardEvolutionarConfig<class Individual, class Population>
+        {
+            virtual void initializePopulation(population_type&){
+            // Select candidates among admissible solutions
+            }
+            
+        };
 	}
 }
