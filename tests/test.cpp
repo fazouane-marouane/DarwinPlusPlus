@@ -2,7 +2,6 @@
 #include <boost/test/unit_test.hpp>
 #include <GeneticAlgorithms.h>
 #include <Random/Random.h>
-#include <random>
 #include <iostream>
 
 BOOST_AUTO_TEST_CASE(UniformDistribution_UsageTest_1)

@@ -1,4 +1,4 @@
-find_package (Boost COMPONENTS unit_test_framework)
+find_package (Boost COMPONENTS unit_test_framework REQUIRED)
 
 include_directories (${DarwinPP_SOURCE_DIR}/include
                      ${DarwinPP_SOURCE_DIR}/src
