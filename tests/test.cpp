@@ -26,24 +26,30 @@ BOOST_AUTO_TEST_CASE(UniformDistribution_UsageTest_2)
 	std::cout << std::endl;
 }
 
-template<>
-class Darwin::Rand::uniform_distribution<std::string>
+namespace Darwin
 {
-public:
-	uniform_distribution(char min= 'a', char max='z'): dist(min,max)
-	{}
-	template<class Generator>
-	std::string operator()(Generator& g)
+	namespace Rand
 	{
-		std::string ret;
-		for (int size = 0; size < 5; ++size)
+		template<>
+		class uniform_distribution<std::string>
 		{
-			ret += static_cast<char>(dist(g));
-		}
-		return ret;
+		public:
+			uniform_distribution(char min = 'a', char max = 'z') : dist(min, max)
+			{}
+			template<class Generator>
+			std::string operator()(Generator& g)
+			{
+				std::string ret;
+				for (int size = 0; size < 5; ++size)
+				{
+					ret += static_cast<char>(dist(g));
+				}
+				return ret;
+			}
+			uniform_distribution<int> dist;
+		};
 	}
-	uniform_distribution<int> dist;
-};
+}
 
 
 BOOST_AUTO_TEST_CASE(UniformDistribution_UsageTest_3)
