@@ -1,12 +1,11 @@
 #pragma once
+#include<random>
+#include <type_traits>
 
 namespace Darwin
 {
 	namespace Rand
 	{
-		#include<random>
-		#include <type_traits>
-
 		namespace details
 		{
 			class integral_type;

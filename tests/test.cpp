@@ -1,8 +1,6 @@
 #define BOOST_TEST_MODULE MyTests
 #include <boost/test/unit_test.hpp>
-
-#include "GeneticAlgorithms.h"
-
+#include <GeneticAlgorithms.h>
 #include <Random/Random.h>
 #include <random>
 #include <iostream>
@@ -28,4 +26,3 @@ BOOST_AUTO_TEST_CASE(UniformDistribution_UsageTest_2)
 		std::cout << dis(gen) << ' ';
 	std::cout << std::endl;
 }
-
