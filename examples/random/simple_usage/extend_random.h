@@ -5,12 +5,15 @@
 #include <cassert> // std::assert
 #include <string> // std::string
 
+template<size_t N>
+class length_equals;
+
 namespace Darwin
 {
 	namespace Rand
 	{
-		template<>
-		class uniform_distribution<std::string>
+		template<size_t N>
+		class uniform_distribution<std::string, length_equals<N>>
 		{
 		public:
 			uniform_distribution(char min = 'a', char max = 'z')
@@ -22,13 +25,13 @@ namespace Darwin
 			std::string operator()(Generator& gen)
 			{
 				std::string ret;
-				for (int position = 0; position < 5; ++position)
+				for (int position = 0; position < N; ++position)
 				{
 					ret += static_cast<char>(dists[position](gen));
 				}
 				return ret;
 			}
-			std::array<uniform_distribution<int>, 5> dists;
+			std::array<uniform_distribution<int>, N> dists;
 		};
 	}
 }

@@ -53,8 +53,11 @@ namespace Darwin
 			};
 		}
 
+		template<class Type, class... Args>
+		class uniform_distribution;
+
 		template<class Type>
-		class uniform_distribution: public details::uniform_distribution<Type, typename details::tag<Type, std::is_arithmetic<Type>::value, std::is_integral<Type>::value>::type>
+		class uniform_distribution<Type>: public details::uniform_distribution<Type, typename details::tag<Type, std::is_arithmetic<Type>::value, std::is_integral<Type>::value>::type>
 		{
 			using base = details::uniform_distribution<Type, typename details::tag<Type, std::is_arithmetic<Type>::value, std::is_integral<Type>::value>::type>;
 		public:

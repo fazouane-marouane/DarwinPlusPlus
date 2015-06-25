@@ -32,7 +32,7 @@ template<class Generator>
 void example_uniform_distribution_string(Generator gen)
 {
 	std::cout << "Testing custom uniform distribution on strings" << std::endl;
-	Darwin::Rand::uniform_distribution<std::string> dis;
+	Darwin::Rand::uniform_distribution<std::string, length_equals<6>> dis;
 	auto rand = [&]() { return dis(gen); };
 	
 	for (int count = 0; count < 10; ++count)
