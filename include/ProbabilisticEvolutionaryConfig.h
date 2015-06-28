@@ -64,16 +64,16 @@ namespace Darwin
 			Darwin::Rand::uniform_distribution<int> dis_size(int(population.size()/3),int((2/3)*population.size()));
 			N = dis_size(gen);
 			Darwin::Rand::uniform_distribution<int> dis(1,N);
-	        auto rand = [&]() { return dis(gen); };
-	        std::vector<int> Values;
+			auto rand = [&]() { return dis(gen); };
+			std::vector<int> Values;
 
-	        while ( Values.size() < N )
-	        {
-	        	Values.push_back(rand());
-	        	sort( Values.begin(), Values.end() );
-                Values.erase( unique( Values.begin(), Values.end() ), Values.end() );
-	        }
-	        base::individuals_references list_individuals;
+			while ( Values.size() < N )
+			{
+				Values.push_back(rand());
+				sort( Values.begin(), Values.end() );
+			    Values.erase( unique( Values.begin(), Values.end() ), Values.end() );
+			}
+			base::individuals_references list_individuals;
 			std::copy( Values.begin(), Values.end(), std::back_inserter( list_individuals ) );  
 			return list_individuals;  
 
