@@ -21,7 +21,7 @@ namespace Darwin
 		using base = Interfaces::IStandardEvolutionaryConfig<GoalFunction, Individual, Population>;
 	public:
 		// sampling: multinomial distribution
-		ProbabilisticEvolutionaryConfig(GoalFunction goal): base(goal)
+		ProbabilisticEvolutionaryConfig(GoalFunction goal, size_t _sizePopulationInit): base(goal), sizePopulationInit(_sizePopulationInit)
 		{}
 
 		virtual typename base::individuals_references selectForCrossOver(typename base::population_type& population, std::string method = "uniform")
@@ -103,14 +103,9 @@ namespace Darwin
 		{
 			// distribution: uniform by default
 			Darwin::Rand::uniform_distribution<Individual> dis;
-<<<<<<< HEAD
-			std::random_device rd;
-			std::mt19937 gen(rd());
 			while ( population.size() < sizePopulationInit )
 			    population.push_back(dis(gen));
-=======
 			population.push_back(dis(gen));
->>>>>>> 37a89c2753cedcc852516142835de0c7c7160dee
 		}
 	private:
 		Rand::uniform_distribution<Individual> dist_crossOver;
@@ -118,5 +113,6 @@ namespace Darwin
 		Rand::uniform_distribution<Individual> dist_removal;
 		Rand::uniform_distribution<Individual> dist_initialization;
 		std::mt19937 gen = std::mt19937(std::random_device()());
+		size_t sizePopulationInit;
 	};
 }

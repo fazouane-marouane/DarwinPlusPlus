@@ -41,7 +41,7 @@ int main()
 		return s;
 	});
 	//IStandardEvolutionaryConfig<std::function<float(Individual)>, Individual, std::vector<Individual> > standardEvolutionary(goalFunction);
-	testEvolutionaryConfig t(goalFunction);
+	testEvolutionaryConfig t(goalFunction, 10);
     t.init();
 	t.breed();
     return 0;
