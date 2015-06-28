@@ -3,9 +3,18 @@
 #include <random>
 #include "Random/Random.h"
 #include <string>
+#include <algorithm>
+#include <iterator>
+#include <stdexcept>
 
 namespace Darwin
 {
+	class NotImplementedException : public std::logic_error
+	{
+	public:
+		NotImplementedException() : std::logic_error("Function not yet implemented.") {}
+	};
+
 	template<class GoalFunction, class Individual, class Population = std::vector<Individual>>
 	class ProbabilisticEvolutionaryConfig: public Interfaces::IStandardEvolutionaryConfig<GoalFunction, Individual, Population>
 	{
@@ -20,7 +29,9 @@ namespace Darwin
 			// other methods: Tournament, SCX
 			// select over a population container
 			if (method == "uniform")
-                return selectForCrossOver_uniform(population);
+				return selectForCrossOver_uniform(population);
+			else
+				throw NotImplementedException();
 		}
 
 		virtual typename base::individuals_references selectForCrossOver_uniform(typename base::population_type& population)
@@ -30,8 +41,8 @@ namespace Darwin
 			// select over a population container
 			std::random_device rd;
 			std::mt19937 gen(rd());
-			Darwin::Rand::uniform_distribution<int> dis_size(int(population.size()/3),int((2/3)*population.size()));
-			int N = dis_size(gen);
+			Darwin::Rand::uniform_distribution<size_t> dis_size(population.size()/3, (2.0/3)*population.size());
+			size_t N = dis_size(gen);
 			Darwin::Rand::uniform_distribution<int> dis(1,N);
 			auto rand = [&]() { return dis(gen); };
 			std::vector<int> Values;
@@ -39,11 +50,12 @@ namespace Darwin
 			while ( Values.size() < N )
 			{
 				Values.push_back(rand());
-				sort( Values.begin(), Values.end() );
-			    Values.erase( unique( Values.begin(), Values.end() ), Values.end() );
+				std::sort( Values.begin(), Values.end() );
+			    Values.erase( std::unique( Values.begin(), Values.end() ), Values.end() );
 			}
 			typename base::individuals_references list_individuals;
-			std::copy( Values.begin(), Values.end(), std::back_inserter( list_individuals ) );
+			for (auto& v : Values)
+				list_individuals.push_back(population[v]);
 			return list_individuals;
 		}
 
@@ -52,8 +64,10 @@ namespace Darwin
 			// multinomial by default
 			// other methods: Tournament, SCX
 			// select over a population container
-			if ( method == "uniform" )
-			    return selectForMutation_uniform(population);
+			if (method == "uniform")
+				return selectForMutation_uniform(population);
+			else
+				throw NotImplementedException();
 		}
 
 		virtual typename base::individuals_references selectForMutation_uniform(typename base::population_type& population)
@@ -63,8 +77,8 @@ namespace Darwin
 			// select over a population container
 			std::random_device rd;
 			std::mt19937 gen(rd());
-			Darwin::Rand::uniform_distribution<int> dis_size(int(population.size()/3),int((2/3)*population.size()));
-			int N = dis_size(gen);
+			Darwin::Rand::uniform_distribution<size_t> dis_size(population.size()/3, (2.0/3)*population.size());
+			size_t N = dis_size(gen);
 			Darwin::Rand::uniform_distribution<int> dis(1,N);
 			auto rand = [&]() { return dis(gen); };
 			std::vector<int> Values;
@@ -76,7 +90,8 @@ namespace Darwin
 			    Values.erase( unique( Values.begin(), Values.end() ), Values.end() );
 			}
 			typename base::individuals_references list_individuals;
-			std::copy( Values.begin(), Values.end(), std::back_inserter( list_individuals ) );
+			for (auto& v : Values)
+				list_individuals.push_back(population[v]);
 			return list_individuals;
 		}
 

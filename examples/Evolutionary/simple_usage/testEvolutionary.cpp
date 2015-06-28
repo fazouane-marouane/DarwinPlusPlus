@@ -31,18 +31,18 @@ class testEvolutionaryConfig : public Darwin::ProbabilisticEvolutionaryConfig<st
 
 int main()
 {
-	auto goalFunction = std::function<float(Individual)>([](auto individual)
+	auto goalFunction = std::function<float(Individual)>([](std::bitset<3> individual)
 	{
-		int s=0;
-		for(individual::iterator it = individual.begin(); it != individual.end(); ++it)
+		float s = 0;
+		for(size_t it = 0; it < 3; ++it)
 		{
-			s = s + *it;
+			s += individual[it];
 		}
 		return s;
 	});
 	//IStandardEvolutionaryConfig<std::function<float(Individual)>, Individual, std::vector<Individual> > standardEvolutionary(goalFunction);
 	testEvolutionaryConfig t(goalFunction);
-    //t.init();
-	//t.breed();
+    t.init();
+	t.breed();
     return 0;
 }

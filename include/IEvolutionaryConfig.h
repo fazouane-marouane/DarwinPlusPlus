@@ -2,6 +2,7 @@
 #include <list> // std::list
 #include <vector>
 #include <functional> // std::reference_wrapper
+#include <string>
 
 namespace Darwin
 {
