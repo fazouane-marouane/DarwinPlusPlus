@@ -9,15 +9,13 @@ namespace Darwin
 		class IEvolutionaryConfig
 		{
 		public:
-			virtual ~IEvolutionaryConfig();
 			virtual IEvolutionaryConfig& init() = 0;
 			virtual IEvolutionaryConfig& breed() = 0;
 			virtual bool goalReached() = 0;
 		};
-		IEvolutionaryConfig::~IEvolutionaryConfig(){}
 
 		template<class Individual, class Population>
-		class IStandardEvolutionarConfig: public IEvolutionaryConfig
+		class IStandardEvolutionarConfig: IEvolutionaryConfig
 		{
 		public:
 			using individual_type = Individual;
@@ -59,12 +57,6 @@ namespace Darwin
 			population_type population;
 		};
         
-        class IMainStandardEvolutionarConfig: IStandardEvolutionarConfig<class Individual, class Population>
-        {
-            virtual void initializePopulation(population_type&){
-            // Select candidates among admissible solutions
-            }
-            
-        };
+
 	}
 }
