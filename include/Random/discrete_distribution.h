@@ -21,12 +21,12 @@ namespace Darwin
 
 			discrete_distribution(std::vector<_Double> const& vect, probabilities_t) : uniform_variable(0, 1)
 			{
-				init(vect_probabilities);
+				init(vect);
 			}
 
 			discrete_distribution(std::vector<_Double> const& vect, cumulated_sums_t) : uniform_variable(0, 1)
 			{
-				init_with_cumulated_sums(vect_probabilities);
+				init_with_cumulated_sums(vect);
 			}
 
 			void init(std::vector<_Double> const& vect_probabilities)
