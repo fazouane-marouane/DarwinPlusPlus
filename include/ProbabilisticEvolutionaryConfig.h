@@ -41,7 +41,7 @@ namespace Darwin
 			// select over a population container
 			std::random_device rd;
 			std::mt19937 gen(rd());
-			Darwin::Rand::uniform_distribution<size_t> dis_size(population.size()/3, (2.0/3)*population.size());
+			Darwin::Rand::uniform_distribution<size_t> dis_size(population.size()/3, static_cast<size_t>((2.0/3)*population.size()));
 			size_t N = dis_size(gen);
 			Darwin::Rand::uniform_distribution<int> dis(1,N);
 			auto rand = [&]() { return dis(gen); };
@@ -77,7 +77,7 @@ namespace Darwin
 			// select over a population container
 			std::random_device rd;
 			std::mt19937 gen(rd());
-			Darwin::Rand::uniform_distribution<size_t> dis_size(population.size()/3, (2.0/3)*population.size());
+			Darwin::Rand::uniform_distribution<size_t> dis_size(population.size()/3, static_cast<size_t>((2.0/3)*population.size()));
 			size_t N = dis_size(gen);
 			Darwin::Rand::uniform_distribution<int> dis(1,N);
 			auto rand = [&]() { return dis(gen); };

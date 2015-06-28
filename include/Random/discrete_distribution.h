@@ -7,8 +7,10 @@ namespace Darwin
 {
 	namespace Rand
 	{
-		class cumulated_sums_t;
-		class probabilities_t;
+		class cumulated_sums_t
+		{};
+		class probabilities_t
+		{};
 
 		template<class _Double>
 		class discrete_distribution
