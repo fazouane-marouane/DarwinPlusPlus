@@ -15,7 +15,7 @@ namespace Darwin
 			virtual bool goalReached() = 0;
 		};
 
-		template<class GoalFunction, class Individual, class Population= std::vector<Individual>>
+		template<class GoalFunction, class Individual, class Population = std::vector<Individual>>
 		class IStandardEvolutionaryConfig: public IEvolutionaryConfig
 		{
 		public:
@@ -27,7 +27,7 @@ namespace Darwin
 
 			virtual IEvolutionaryConfig& init()
 			{
-				initializePopulation(Population);
+				initializePopulation(population);
 				return *this;
 			}
 
@@ -44,11 +44,11 @@ namespace Darwin
 				return *this;
 			}
 
-			virtual individuals_references selectForCrossOver(population_type&, method = 'multinomial') = 0;
+			virtual individuals_references selectForCrossOver(population_type&, std::string) = 0;
 
-			virtual individuals_references selectForMutation(population_type&, method = 'multinomial') = 0;
+			virtual individuals_references selectForMutation(population_type&, std::string) = 0;
 
-			virtual individuals_references selectForRemoval(population_type&, method = 'multinomial') =0;
+			virtual individuals_references selectForRemoval(population_type&, std::string) =0;
 
 			virtual void initializePopulation(population_type&) =0;
 
