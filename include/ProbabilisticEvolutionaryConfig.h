@@ -27,7 +27,7 @@ namespace Darwin
 			// multinomial by default
 			// other methods: Tournament, SCX
 			// select over a population container
-			std::random_device rd;
+		    std::random_device rd;
 			std::mt19937 gen(rd());
 			Darwin::Rand::uniform_distribution<int> dis_size(int(population.size()/3),int((2/3)*population.size()));
 			N = dis_size(gen);
