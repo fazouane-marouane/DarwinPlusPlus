@@ -1,4 +1,4 @@
-#pragma
+#pragma once
 #include <Random/Random.h> // Darwin::Rand::uniform_distribution
 #include <Random/discrete_distribution.h>
 #include <cstddef> // std::size_t

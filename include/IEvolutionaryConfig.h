@@ -10,10 +10,13 @@ namespace Darwin
 		class IEvolutionaryConfig
 		{
 		public:
+			virtual ~IEvolutionaryConfig();
 			virtual IEvolutionaryConfig& init() = 0;
 			virtual IEvolutionaryConfig& breed() = 0;
 			virtual bool goalReached() = 0;
 		};
+
+		IEvolutionaryConfig::~IEvolutionaryConfig() {}
 
 		template<class GoalFunction, class Individual, class Population = std::vector<Individual>>
 		class IStandardEvolutionaryConfig: public IEvolutionaryConfig
@@ -38,23 +41,23 @@ namespace Darwin
 				// Mutation
 				auto mutants = mutate(selectForMutation(population));
 				// Merge these new individuals into the original population
-				population.add(newIndividuals, mutants); // TODO: sort this, somehow
+				//population.add(newIndividuals, mutants); // TODO: sort this, somehow
 				// Natural selection
-				population.remove(selectForRemoval(population));
+				//population.remove(selectForRemoval(population));
 				return *this;
 			}
 
-			virtual individuals_references selectForCrossOver(population_type&, std::string) = 0;
+			virtual individuals_references selectForCrossOver(population_type&, std::string = "uniform") = 0;
 
-			virtual individuals_references selectForMutation(population_type&, std::string) = 0;
+			virtual individuals_references selectForMutation(population_type&, std::string = "uniform") = 0;
 
-			virtual individuals_references selectForRemoval(population_type&, std::string) =0;
+			virtual individuals_references selectForRemoval(population_type&, std::string = "uniform") =0;
 
-			virtual void initializePopulation(population_type&) =0;
+			virtual void initializePopulation(population_type&, std::string method = "uniform") =0;
 
-			virtual population_type crossOver(individuals_references&) =0;
+			virtual population_type crossOver(individuals_references const&) =0;
 
-			virtual population_type mutate(individuals_references&) =0;
+			virtual population_type mutate(individuals_references const&) =0;
 
 		protected:
 			population_type population;

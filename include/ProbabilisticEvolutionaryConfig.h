@@ -9,7 +9,7 @@ namespace Darwin
 	template<class GoalFunction, class Individual, class Population = std::vector<Individual>>
 	class ProbabilisticEvolutionaryConfig: public Interfaces::IStandardEvolutionaryConfig<GoalFunction, Individual, Population>
 	{
-		using base = Interfaces::IStandardEvolutionaryConfig<Individual, Population>;
+		using base = Interfaces::IStandardEvolutionaryConfig<GoalFunction, Individual, Population>;
 	public:
 		// sampling: multinomial distribution
 		using base::base;
@@ -53,7 +53,7 @@ namespace Darwin
 			// other methods: Tournament, SCX
 			// select over a population container
 			if ( method == "uniform" )
-			    return selectForMutation_uniform(population, method);
+			    return selectForMutation_uniform(population);
 		}
 
 		virtual typename base::individuals_references selectForMutation_uniform(typename base::population_type& population)
@@ -78,7 +78,6 @@ namespace Darwin
 			typename base::individuals_references list_individuals;
 			std::copy( Values.begin(), Values.end(), std::back_inserter( list_individuals ) );
 			return list_individuals;
-
 		}
 
 		virtual typename base::individuals_references selectForRemoval(typename base::population_type& population, std::string method = "uniform")
@@ -94,7 +93,7 @@ namespace Darwin
 			Darwin::Rand::uniform_distribution<Individual> dis;
 			std::random_device rd;
 			std::mt19937 gen(rd());
-			population = dis(gen);
+			population.push_back(dis(gen));
 		}
 	private:
 		Rand::uniform_distribution<Individual> dist_crossOver;
