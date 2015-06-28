@@ -55,6 +55,7 @@ endif(CHECK_CXX_COMPILER_USED1)
 #target_compile_features(foobar PRIVATE cxx_range_for)
 
 add_subdirectory (src) 
+add_subdirectory (examples) 
 add_subdirectory(tests)
 enable_testing ()
 add_test (NAME MyTest COMMAND Test)

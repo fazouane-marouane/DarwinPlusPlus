@@ -1,5 +1,6 @@
 #pragma once
 #include <list> // std::list
+#include <vector>
 #include <functional> // std::reference_wrapper
 
 namespace Darwin
@@ -14,13 +15,15 @@ namespace Darwin
 			virtual bool goalReached() = 0;
 		};
 
-		template<class Individual, class Population>
-		class IStandardEvolutionarConfig: IEvolutionaryConfig
+		template<class GoalFunction, class Individual, class Population= std::vector<Individual>>
+		class IStandardEvolutionaryConfig: public IEvolutionaryConfig
 		{
 		public:
 			using individual_type = Individual;
 			using population_type = Population;
 			using individuals_references = std::list<std::reference_wrapper<Individual>>; // TODO: lame naming
+
+			IStandardEvolutionaryConfig(GoalFunction _goalFunction) : goalFunction(_goalFunction) {}
 
 			virtual IEvolutionaryConfig& init()
 			{
@@ -41,11 +44,11 @@ namespace Darwin
 				return *this;
 			}
 
-			virtual individuals_references selectForCrossOver(population_type&) = 0;
+			virtual individuals_references selectForCrossOver(population_type&, method = 'multinomial') = 0;
 
-			virtual individuals_references selectForMutation(population_type&) = 0;
+			virtual individuals_references selectForMutation(population_type&, method = 'multinomial') = 0;
 
-			virtual individuals_references selectForRemoval(population_type&) =0;
+			virtual individuals_references selectForRemoval(population_type&, method = 'multinomial') =0;
 
 			virtual void initializePopulation(population_type&) =0;
 
@@ -55,6 +58,7 @@ namespace Darwin
 
 		protected:
 			population_type population;
+			GoalFunction goalFunction;
 		};
         
 
