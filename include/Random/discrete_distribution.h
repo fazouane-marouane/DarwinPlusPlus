@@ -2,6 +2,9 @@
 #include "Random.h"
 #include <limits>
 #include <cassert>
+#include <algorithm>
+#include <iterator>
+#include <vector>
 
 namespace Darwin
 {

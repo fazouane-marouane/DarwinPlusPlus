@@ -32,7 +32,7 @@ namespace Darwin
 			std::string operator()(Generator& gen)
 			{
 				std::string ret;
-				for (int position = 0; position < N; ++position)
+				for (size_t position = 0; position < N; ++position)
 				{
 					ret += static_cast<char>(dists[position](gen));
 				}
