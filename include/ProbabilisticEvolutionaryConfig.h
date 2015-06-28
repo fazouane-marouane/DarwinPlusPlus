@@ -108,7 +108,8 @@ namespace Darwin
 			Darwin::Rand::uniform_distribution<Individual> dis;
 			std::random_device rd;
 			std::mt19937 gen(rd());
-			population.push_back(dis(gen));
+			while ( population.size() < sizePopulationInit )
+			    population.push_back(dis(gen));
 		}
 	private:
 		Rand::uniform_distribution<Individual> dist_crossOver;
