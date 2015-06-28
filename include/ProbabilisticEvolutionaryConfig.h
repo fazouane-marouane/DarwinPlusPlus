@@ -21,7 +21,8 @@ namespace Darwin
 		using base = Interfaces::IStandardEvolutionaryConfig<GoalFunction, Individual, Population>;
 	public:
 		// sampling: multinomial distribution
-		using base::base;
+		ProbabilisticEvolutionaryConfig(GoalFunction goal): base(goal)
+		{}
 
 		virtual typename base::individuals_references selectForCrossOver(typename base::population_type& population, std::string method = "uniform")
 		{
@@ -39,8 +40,6 @@ namespace Darwin
 			// multinomial by default
 			// other methods: Tournament, SCX
 			// select over a population container
-			std::random_device rd;
-			std::mt19937 gen(rd());
 			Darwin::Rand::uniform_distribution<size_t> dis_size(population.size()/3, static_cast<size_t>((2.0/3)*population.size()));
 			size_t N = dis_size(gen);
 			Darwin::Rand::uniform_distribution<int> dis(1,N);
@@ -75,8 +74,6 @@ namespace Darwin
 			// uniform by default
 			// other methods: Tournament, SCX
 			// select over a population container
-			std::random_device rd;
-			std::mt19937 gen(rd());
 			Darwin::Rand::uniform_distribution<size_t> dis_size(population.size()/3, static_cast<size_t>((2.0/3)*population.size()));
 			size_t N = dis_size(gen);
 			Darwin::Rand::uniform_distribution<int> dis(1,N);
@@ -106,8 +103,6 @@ namespace Darwin
 		{
 			// distribution: uniform by default
 			Darwin::Rand::uniform_distribution<Individual> dis;
-			std::random_device rd;
-			std::mt19937 gen(rd());
 			population.push_back(dis(gen));
 		}
 	private:
@@ -115,7 +110,6 @@ namespace Darwin
 		Rand::uniform_distribution<Individual> dist_mutation;
 		Rand::uniform_distribution<Individual> dist_removal;
 		Rand::uniform_distribution<Individual> dist_initialization;
-		std::random_device rd;
-		std::mt19937 gen;
+		std::mt19937 gen = std::mt19937(std::random_device()());
 	};
 }
