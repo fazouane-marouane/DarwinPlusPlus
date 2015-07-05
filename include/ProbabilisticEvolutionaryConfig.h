@@ -94,8 +94,8 @@ namespace Darwin
 
 		virtual typename base::individuals_references selectForRemoval(typename base::population_type& population, std::string method = "uniform")
 		{
-			// multinomial method by default
-			typename base::individuals_references b_;
+			// uniform by default
+			Darwin::Rand::uniform_distribution<size_t> dis_size(population.size()/3, static_cast<size_t>((2.0/3)*population.size()));
 			return b_;
 		}
 
