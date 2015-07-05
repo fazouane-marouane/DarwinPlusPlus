@@ -17,7 +17,7 @@ namespace Darwin
 		{
 			// check that toBeRemoved is sorted
 			for(auto v: toBeRemoved)
-				dest.erase(v);
+				dest.erase(dest.begin()+v);
 		}
 	}
 }
