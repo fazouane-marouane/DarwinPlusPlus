@@ -103,11 +103,14 @@ namespace Darwin
 
 		virtual typename std::vector<size_t> selectForRemoval_thresholding(typename base::population_type& population){
 			int n = 0;
-			population_triee = std::sort(population.begin(), population.end(), [individual_type indiv1, individual_type indiv2]{return goalFunction(indiv1) < goalFunction(indiv2);});
+			population_type sorted_population = std::sort(population.begin(), population.end(), [individual_type indiv1, individual_type indiv2]{return goalFunction(indiv1) < goalFunction(indiv2);});
+			population = sorted_population;
 			size_t N = (int)population_size*(0.6);   // Keep only 60 % of the population
 			std::vector<int> v(N);
-            return std::generate(v.begin(), v.end(), [&n]{ return n++;});
+            return std::generate(v.rbegin(), v.rend(), [&n]{ return n++;});
 		}
+
+		virtual typename std::vector<size_t> 
 
 		virtual void initializePopulation(typename base::population_type& population, std::string method = "uniform")
 		{
