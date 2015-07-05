@@ -1,10 +1,11 @@
-#pragma once
+ #pragma once
 #include "Random.h"
 #include <limits>
 #include <cassert>
 #include <algorithm>
 #include <iterator>
 #include <vector>
+#include <cmath>
 
 namespace Darwin
 {
@@ -51,7 +52,7 @@ namespace Darwin
 				{
 					assert(vect_sums[itr-1] <= vect_sums[itr]);
 				}
-				assert(abs(vect_sums.back() - 1.0) < std::numeric_limits<_Double>::epsilon());
+				assert(std::abs(vect_sums.back() - 1.0) < std::numeric_limits<_Double>::epsilon());
 				_initialized = true;
 				upper_limits = vect_sums;
 			}
@@ -61,7 +62,7 @@ namespace Darwin
 			{
 				assert(_initialized);
 				auto itr = std::upper_bound(std::begin(upper_limits), std::end(upper_limits), uniform_variable(gen));
-				return itr - std::begin(upper_limits);
+				return static_cast<size_t>(itr - std::begin(upper_limits));
 			}
 		private:
 			std::vector<double> upper_limits;
