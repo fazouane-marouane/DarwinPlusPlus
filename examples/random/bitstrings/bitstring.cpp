@@ -1,8 +1,7 @@
 // std
 #include <iostream> // std::cout
 // Darwin
-#include <Random/Random.h>
-#include "extend_random.h"
+#include <modules/bitstring/bitstring.h>
 
 template<class Generator>
 void example_uniform_distribution_bitstring(Generator gen)

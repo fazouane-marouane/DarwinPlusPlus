@@ -3,6 +3,7 @@
 #include <vector>
 #include <functional> // std::reference_wrapper
 #include <string>
+#include "datastructures/algorithms.h"
 
 namespace Darwin
 {
@@ -19,7 +20,7 @@ namespace Darwin
 
 		IEvolutionaryConfig::~IEvolutionaryConfig() {}
 
-		template<class GoalFunction, class Individual, class Population = std::vector<Individual>>
+		template<class GoalFunction, class Individual, class Population>
 		class IStandardEvolutionaryConfig: public IEvolutionaryConfig
 		{
 		public:
@@ -42,9 +43,9 @@ namespace Darwin
 				// Mutation
 				auto mutants = mutate(selectForMutation(population));
 				// Merge these new individuals into the original population
-				//population.add(newIndividuals, mutants); // TODO: sort this, somehow
+				Darwin::utility::merge(population, newIndividuals, mutants);
 				// Natural selection
-				//population.remove(selectForRemoval(population));
+				Darwin::utility::remove(population, selectForRemoval(population));
 				return *this;
 			}
 
