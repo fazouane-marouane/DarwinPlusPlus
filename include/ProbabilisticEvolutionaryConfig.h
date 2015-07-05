@@ -41,7 +41,8 @@ namespace Darwin
 			// other methods: Tournament, SCX
 			// select over a population container
 			Darwin::Rand::uniform_distribution<size_t> dis_size(population.size()/3, static_cast<size_t>((2.0/3)*population.size()));
-			size_t N = dis_size(gen);
+			// size_t N = dis_size(gen);
+			size_t N = (int)population_size*(0.3);
 			Darwin::Rand::uniform_distribution<int> dis(1,N);
 			auto rand = [&]() { return dis(gen); };
 			std::vector<int> Values;
@@ -71,11 +72,10 @@ namespace Darwin
 
 		virtual typename base::individuals_references selectForMutation_uniform(typename base::population_type& population)
 		{
-			// uniform by default
-			// other methods: Tournament, SCX
 			// select over a population container
 			Darwin::Rand::uniform_distribution<size_t> dis_size(population.size()/3, static_cast<size_t>((2.0/3)*population.size()));
-			size_t N = dis_size(gen);
+			//size_t N = dis_size(gen);
+			size_t N = (int)population_size*(0.3);
 			Darwin::Rand::uniform_distribution<int> dis(1,N);
 			auto rand = [&]() { return dis(gen); };
 			std::vector<int> Values;
@@ -92,11 +92,21 @@ namespace Darwin
 			return list_individuals;
 		}
 
-		virtual typename base::individuals_references selectForRemoval(typename base::population_type& population, std::string method = "uniform")
+		virtual typename std::vector<size_t> selectForRemoval(typename base::population_type& population, std::string method = "thresholding")
 		{
-			// uniform by default
-			Darwin::Rand::uniform_distribution<size_t> dis_size(population.size()/3, static_cast<size_t>((2.0/3)*population.size()));
-			return b_;
+			// Thresholding by default
+			if method == "thresholding"
+				return selectForRemoval_thresholding(population);
+			else 
+				throw NotImplementedException();
+		}
+
+		virtual typename std::vector<size_t> selectForRemoval_thresholding(typename base::population_type& population){
+			int n = 0;
+			population_triee = std::sort(population.begin(), population.end(), [individual_type indiv1, individual_type indiv2]{return goalFunction(indiv1) < goalFunction(indiv2);});
+			size_t N = (int)population_size*(0.6);   // Keep only 60 % of the population
+			std::vector<int> v(N);
+            return std::generate(v.begin(), v.end(), [&n]{ return n++;});
 		}
 
 		virtual void initializePopulation(typename base::population_type& population, std::string method = "uniform")

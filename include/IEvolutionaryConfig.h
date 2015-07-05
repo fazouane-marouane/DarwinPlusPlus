@@ -27,7 +27,7 @@ namespace Darwin
 			using population_type = Population;
 			using individuals_references = std::list<std::reference_wrapper<Individual>>; // TODO: lame naming
 
-			IStandardEvolutionaryConfig(GoalFunction _goalFunction) : goalFunction(_goalFunction) {}
+			IStandardEvolutionaryConfig(GoalFunction _goalFunction, int _population_size) : goalFunction(_goalFunction), population_size(_population_size){}
 
 			virtual IEvolutionaryConfig& init()
 			{
@@ -52,16 +52,17 @@ namespace Darwin
 
 			virtual individuals_references selectForMutation(population_type&, std::string = "uniform") = 0;
 
-			virtual individuals_references selectForRemoval(population_type&, std::string = "uniform") =0;
+			virtual individuals_references selectForRemoval(population_type&, std::string = "thresholding") = 0;
 
-			virtual void initializePopulation(population_type&, std::string method = "uniform") =0;
+			virtual void initializePopulation(population_type&, std::string method = "uniform") = 0;
 
-			virtual population_type crossOver(individuals_references const&) =0;
+			virtual population_type crossOver(individuals_references const&) = 0;
 
-			virtual population_type mutate(individuals_references const&) =0;
+			virtual population_type mutate(individuals_references const&) = 0;
 
 		protected:
 			population_type population;
+			int population_size;
 			GoalFunction goalFunction;
 		};
         
