@@ -1,5 +1,6 @@
 # C++
 ## Compiled Object files
+*.pdf
 *.slo
 *.lo
 *.o
