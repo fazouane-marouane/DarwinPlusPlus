@@ -9,9 +9,9 @@
 using Individual = std::vector<bool>;
 
 template<class GoalFunction>
-class testEvolutionaryConfig : public Darwin::ProbabilisticEvolutionaryConfig<GoalFunction, Individual>
+class testEvolutionaryConfig : public Darwin::ProbabilisticEvolutionaryConfig<GoalFunction, Individual, std::vector<Individual>>
 {
-	using base = Darwin::ProbabilisticEvolutionaryConfig<GoalFunction, Individual>;
+	using base = Darwin::ProbabilisticEvolutionaryConfig<GoalFunction, Individual, std::vector<Individual>>;
 public :
 	using base::base;
 	testEvolutionaryConfig(GoalFunction goal, size_t Population_size, size_t dimension): base(goal, Population_size, Darwin::Rand::uniform_distribution<Individual>(dimension)), mutation_dist(0, dimension-1)
@@ -101,8 +101,9 @@ int main()
 		}
 		return s;
 	};
-	auto config = make_testEvolutionaryConfig(goalFunction, 100, 200);
+	auto config = make_testEvolutionaryConfig(goalFunction, 100, 10'000);
 	Darwin::GeneticAlgorithmLoop(config);
 	config.printBest();
+
     return 0;
 }
