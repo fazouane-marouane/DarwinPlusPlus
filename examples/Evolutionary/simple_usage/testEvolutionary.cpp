@@ -20,11 +20,8 @@ public :
 
 	using typename base::individual_type;
 	using typename base::individuals_references;
-<<<<<<< HEAD
-=======
 	using base::population;
 
->>>>>>> 977c67318784d6510e6245030a3d30c4f35919e0
 	virtual std::vector<Individual> crossOver(individuals_references const & parents)
 	{
 		std::vector<Individual> population_;
