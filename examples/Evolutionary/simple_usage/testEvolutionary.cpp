@@ -21,6 +21,7 @@ public :
 	using typename base::individual_type;
 	using typename base::individuals_references;
 	using base::population;
+	using base::goalFunction;
 
 	virtual std::vector<Individual> crossOver(individuals_references const & parents)
 	{
