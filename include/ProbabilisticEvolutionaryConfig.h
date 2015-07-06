@@ -51,7 +51,7 @@ namespace Darwin
 			// select over a population container
 			Darwin::Rand::uniform_distribution<size_t> disCrossOver_uniform(0, population.size()-1);
 			size_t N = static_cast<size_t>(population_size*(0.3));
-			auto rand = [&]() { return dis(gen); };
+			auto rand = [&]() { return disCrossOver_uniform(gen); };
 			std::vector<size_t> Values;
 
 			while ( Values.size() < N )

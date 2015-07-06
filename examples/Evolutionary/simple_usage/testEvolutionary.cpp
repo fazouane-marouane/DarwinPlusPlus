@@ -66,7 +66,7 @@ public :
 
 	virtual bool goalReached()
 	{
-		return counter++ < 1000;
+		return counter++ > 10;
 	}
 
 	void printBest() const
@@ -101,7 +101,7 @@ int main()
 		}
 		return s;
 	};
-	auto config = make_testEvolutionaryConfig(goalFunction, 1000, 50);
+	auto config = make_testEvolutionaryConfig(goalFunction, 100, 200);
 	Darwin::GeneticAlgorithmLoop(config);
 	config.printBest();
     return 0;
