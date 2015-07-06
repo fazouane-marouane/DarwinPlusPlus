@@ -18,10 +18,9 @@ namespace Darwin
 			virtual bool goalReached() = 0;
 		};
 
-		template<class Derived, class GoalFunction, class Individual, class Population>
+		template<class GoalFunction, class Individual, class Population>
 		class IStandardEvolutionaryConfig: public IEvolutionaryConfig
 		{
-			friend Derived;
 		public:
 			using individual_type = Individual;
 			using population_type = Population;

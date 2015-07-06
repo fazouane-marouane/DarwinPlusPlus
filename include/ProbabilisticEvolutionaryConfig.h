@@ -16,12 +16,20 @@ namespace Darwin
 	};
 
 	template<class GoalFunction, class Individual, class Population>
-	class ProbabilisticEvolutionaryConfig: public Interfaces::IStandardEvolutionaryConfig<ProbabilisticEvolutionaryConfig<GoalFunction, Individual, Population>, GoalFunction, Individual, Population>
+	class ProbabilisticEvolutionaryConfig: public Interfaces::IStandardEvolutionaryConfig<GoalFunction, Individual, Population>
 	{
 	private:
-		using base = Interfaces::IStandardEvolutionaryConfig<ProbabilisticEvolutionaryConfig, GoalFunction, Individual, Population>;
+		using base = Interfaces::IStandardEvolutionaryConfig<GoalFunction, Individual, Population>;
 		using uniform_individual_distribution = Darwin::Rand::uniform_distribution<Individual>;
 	public:
+
+		using typename base::population_type;
+		using typename base::individuals_references;
+		using typename base::individual_type;
+		using base::population_size;
+		using base::goalFunction;
+		using base::population;
+
 		// sampling: multinomial distribution
 		ProbabilisticEvolutionaryConfig(GoalFunction goal, size_t _population_size) : base(goal, _population_size) {}
 		ProbabilisticEvolutionaryConfig(GoalFunction goal, size_t _population_size, uniform_individual_distribution dist): base(goal, _population_size), dist_initialization(dist){}
