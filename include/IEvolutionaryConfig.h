@@ -12,13 +12,11 @@ namespace Darwin
 		class IEvolutionaryConfig
 		{
 		public:
-			virtual ~IEvolutionaryConfig();
+			virtual ~IEvolutionaryConfig() {}
 			virtual IEvolutionaryConfig& init() = 0;
 			virtual IEvolutionaryConfig& breed() = 0;
 			virtual bool goalReached() = 0;
 		};
-
-		IEvolutionaryConfig::~IEvolutionaryConfig() {}
 
 		template<class GoalFunction, class Individual, class Population>
 		class IStandardEvolutionaryConfig: public IEvolutionaryConfig

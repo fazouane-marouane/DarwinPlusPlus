@@ -21,6 +21,7 @@ namespace Darwin
 	private:
 		using base = Interfaces::IStandardEvolutionaryConfig<GoalFunction, Individual, Population>;
 		//using base::population_size;
+		using uniform_individual_distribution = Darwin::Rand::uniform_distribution<Individual>;
 	public:
 
 		using typename base::population_type;
@@ -29,7 +30,8 @@ namespace Darwin
 		using base::population_size;
 		using base::goalFunction;
 		// sampling: multinomial distribution
-		ProbabilisticEvolutionaryConfig(GoalFunction goal, size_t _population_size): base(goal, _population_size){}
+		ProbabilisticEvolutionaryConfig(GoalFunction goal, size_t _population_size) : base(goal, _population_size) {}
+		ProbabilisticEvolutionaryConfig(GoalFunction goal, size_t _population_size, uniform_individual_distribution dist): base(goal, _population_size), dist_initialization(dist){}
 
 		virtual individuals_references selectForCrossOver(population_type& population, std::string method = "uniform")
 		{
@@ -47,7 +49,7 @@ namespace Darwin
 			// multinomial by default
 			// other methods: Tournament, SCX
 			// select over a population container
-			Darwin::Rand::uniform_distribution<size_t> dis(0, population.size());
+			Darwin::Rand::uniform_distribution<size_t> disCrossOver_uniform(0, population.size()-1);
 			size_t N = static_cast<size_t>(population_size*(0.3));
 			auto rand = [&]() { return dis(gen); };
 			std::vector<size_t> Values;
@@ -79,7 +81,7 @@ namespace Darwin
 		{
 			// select over a population container
 			size_t N = static_cast<size_t>(population_size*(0.3));
-			Darwin::Rand::uniform_distribution<size_t> dis(1,N);
+			Darwin::Rand::uniform_distribution<size_t> dis(0,N-1);
 			auto rand = [&]() { return dis(gen); };
 			std::vector<size_t> Values;
 
@@ -105,26 +107,24 @@ namespace Darwin
 		}
 
 		virtual std::vector<size_t> selectForRemoval_thresholding(population_type& population){
-			size_t n = 0;
-			std::sort(population.begin(), population.end(), [this](individual_type& indiv1, individual_type& indiv2){return goalFunction(indiv1) < goalFunction(indiv2);});
+			std::sort(population.begin(), population.end(),
+				[this](individual_type& indiv1, individual_type& indiv2)
+				{
+					return goalFunction(indiv1) < goalFunction(indiv2);
+				});
 			size_t N = static_cast<size_t>(population_size*(0.6));   // Keep only 60 % of the population
 			std::vector<size_t> v(N);
-			std::generate(v.rbegin(), v.rend(), [&n]{ return n++;});
+			std::generate(v.rbegin(), v.rend(), [n = 0U]() mutable { return n++;});
             return v;
 		}
 
 		virtual void initializePopulation(population_type& population, std::string method = "uniform")
 		{
 			// distribution: uniform by default
-			Darwin::Rand::uniform_distribution<Individual> dis;
-			while ( population.size() < population_size )
-			    population.push_back(dis(gen));
-			population.push_back(dis(gen));
+			while ( population.size() <= population_size )
+			    population.push_back(dist_initialization(gen));
 		}
-	private:
-		Rand::uniform_distribution<Individual> dist_crossOver;
-		Rand::uniform_distribution<Individual> dist_mutation;
-		Rand::uniform_distribution<Individual> dist_removal;
+	protected:
 		Rand::uniform_distribution<Individual> dist_initialization;
 		std::mt19937 gen = std::mt19937(std::random_device()());
 	};
