@@ -28,6 +28,14 @@ public :
 		std::vector<Individual> population_;
 		return population_;
 	}
+
+	void print()
+	{
+		for (auto v: population){
+			std::cout << v << std::endl;
+		}
+	}
+
 	virtual bool goalReached()
 	{
 		return false;
@@ -54,6 +62,9 @@ int main()
 	};
 	auto t = make_testEvolutionaryConfig(goalFunction, 10);
     t.init();
+    t.print();
+    std
 	t.breed();
+	t.print();
     return 0;
 }
