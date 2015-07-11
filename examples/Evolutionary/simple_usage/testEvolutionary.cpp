@@ -5,7 +5,9 @@
 #include <modules/bitstring/bitstring.h>
 #include <ProbabilisticEvolutionaryConfig.h>
 #include <GeneticAlgorithms.h>
+#include <eigen3/Eigen/Dense>
 
+using namespace Eigen;
 using Individual = std::vector<bool>;
 
 template<class GoalFunction>
@@ -94,18 +96,44 @@ testEvolutionaryConfig<GoalFunction> make_testEvolutionaryConfig(GoalFunction go
 
 int main()
 {
-	auto goalFunction = [](std::vector<bool> individual)
+	int nbCities = 50;
+	MatrixXf cities(2,nbCities);
+	for (int i = 0; i < nbCities; i++)
 	{
+		cities(1,i) = i%5;
+		cities(2,i) = i/5; 
+	}
+
+	// MatrixXf cityMap(nbCities, nbCities);
+	// for (int i = 0; i < nbCities; i++)
+	// 	for (int j = 0; j < nbCities; j++)
+	// 		cityMap(i,j)= sqrt(i^2 + j^2);
+
+	auto goalFunction = [](std::vector<int> individual)
+	{
+		// float s = 0;
+		// for (int i = 0; i < individual.size()-1; i++)
+		// {
+		// 	//s += cityMap(individual[i],individual[i+1]); 
+		// 	s -= sqrt((individual[i]/5-individual[i+1]/5)^2 + ((individual[i]%5)-individual[i+1]%5)^2);
+		// 	for (int j = 0; j < individual.size()-1; j++)
+		// 	{
+		// 		s -= ((individual[i] == individual[j]) ? 100 : 0);
+		// 	}
+		// }
+		// return s;
 		float s = 0;
-		for(auto v: individual)
-		{
+		for (auto v : individual){
 			s += v;
 		}
 		return s;
 	};
-	auto config = make_testEvolutionaryConfig(goalFunction, 100, 10'000);
+
+	// Get result of maximisation
+
+	auto config = make_testEvolutionaryConfig(goalFunction, 100, nbCities*nbCities);
 	Darwin::GeneticAlgorithmLoop(config);
-	config.printBest();
+	//config.printBest();
 
     return 0;
 }
