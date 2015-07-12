@@ -10,7 +10,8 @@
 #include <modules/permutation/permutation.h>
 
 using namespace Eigen;
-using Individual = std::vector<int>;
+//using Individual = std::vector<int>;
+using Individual = Darwin::permutation;
 
 namespace Darwin
 {
@@ -190,16 +191,16 @@ int main()
 		}
 
 
-	auto goalFunction = [&cityMap](std::vector<int> individual)
+	auto goalFunction = [&cityMap](Individual individual)
 	{
 		float s = 0;
 		for (int i = 0; i < individual.size()-1; i++)
 		{
-			s -= 10*cityMap(individual.at(i) % cityMap.rows(),individual.at(i+1) % cityMap.rows());
+			s -= 10*cityMap(individual.get().at(i) % cityMap.rows(),individual.get().at(i+1) % cityMap.rows());
 			//s -= sqrt((individual[i]/5-individual[i+1]/5)^2 + ((individual[i]%5)-individual[i+1]%5)^2);
 			for (int j = 0; j < individual.size()-1; j++)
 			{
-				s -= ((individual[i] == individual[j]) ? 100 : 0);
+				s -= ((individual.get().at(i) == individual[j]) ? 100 : 0);
 			}
 		}
 		return s;
