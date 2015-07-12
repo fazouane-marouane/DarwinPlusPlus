@@ -96,7 +96,7 @@ testEvolutionaryConfig<GoalFunction> make_testEvolutionaryConfig(GoalFunction go
 
 int main()
 {
-	auto goalFunction = [](std::vector<bool> individual)
+	auto goalFunction = [](std::vector<bool> const& individual)
 	{
 		float s = 0;
 		for(auto v: individual)

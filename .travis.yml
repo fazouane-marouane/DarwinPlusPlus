@@ -4,7 +4,7 @@ compiler:
   - gcc
   - clang
 
-sudo: true
+sudo: false
 
 # Handle git submodules yourself
 git:
@@ -12,18 +12,14 @@ git:
 
 before_script:
   - if [ "$TRAVIS_OS_NAME"=="linux" ] && [ "$CXX" == "g++" ]; then export GCC_VERSION="4.9"; fi
-  - if [ "$TRAVIS_OS_NAME"=="linux" ] && [ "$CXX" == "g++" ]; then sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi
-  - if [ "$TRAVIS_OS_NAME"=="linux" ] && [ "$CXX" == "clang++" ]; then sudo add-apt-repository -y ppa:h-rayflood/llvm; fi
-  - if [ "$TRAVIS_OS_NAME"=="linux" ]; then sudo apt-get update -qq; fi
-  - if [ "$TRAVIS_OS_NAME"=="linux" ] && [ "$CXX" == "g++" ]; then sudo apt-get install -qq g++-${GCC_VERSION}; fi
-  - if [ "$TRAVIS_OS_NAME"=="linux" ] && [ "$CXX" == "g++" ]; then sudo apt-get install -qq gcc-${GCC_VERSION}; fi
-  - if [ "$TRAVIS_OS_NAME"=="linux" ] && [ "$CXX" == "g++" ]; then sudo ln -s -v -f $(which g++-${GCC_VERSION}) /usr/bin/g++; fi
-  - if [ "$TRAVIS_OS_NAME"=="linux" ] && [ "$CXX" == "g++" ]; then sudo ln -s -v -f $(which gcc-${GCC_VERSION}) /usr/bin/gcc; fi
-  - if [ "$TRAVIS_OS_NAME"=="linux" ]; then sudo apt-get install -qq libboost-all-dev; fi
+  - if [ "$TRAVIS_OS_NAME"=="linux" ] && [ "$CXX" == "g++" ]; then export CXX_COMPILER=$(which g++-${GCC_VERSION}); fi
+  - if [ "$TRAVIS_OS_NAME"=="linux" ] && [ "$CXX" == "g++" ]; then export C_COMPILER=$(which gcc-${GCC_VERSION}); fi
+  - if [ "$TRAVIS_OS_NAME"=="linux" ] && [ "$CXX" != "g++" ]; then export CXX_COMPILER=$(which clang++); fi
+  - if [ "$TRAVIS_OS_NAME"=="linux" ] && [ "$CXX" != "g++" ]; then export C_COMPILER=$(which clang); fi
   - mkdir build
   - cd build
   - cmake --version
-  - cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} ..
+  - cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_COMPILER=${CXX_COMPILER} -DCMAKE_C_COMPILER=${C_COMPILER} ..
 
 script: make && ctest
 
@@ -37,3 +33,13 @@ env:
 matrix:
   allow_failures:
     - os: osx
+
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r/test
+    - h-rayflood/llvm
+    packages:
+        - cmake
+        - g++-${GCC_VERSION}
+        - libboost-all-dev

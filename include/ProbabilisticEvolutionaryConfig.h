@@ -108,7 +108,7 @@ namespace Darwin
 		{
 			auto& goalFunction = this->getGoalFunction();
 			std::sort(population.begin(), population.end(),
-				[&goalFunction](individual_type& indiv1, individual_type& indiv2)
+				[&goalFunction](individual_type const& indiv1, individual_type const& indiv2)
 				{
 					return goalFunction(indiv1) < goalFunction(indiv2);
 				});
