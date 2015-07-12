@@ -28,10 +28,11 @@ os:
   - linux
 
 env:
-  - BUILD_TYPE=Debug
-  - GCC_VERSION="4.9"
-  - CLANG_VERSION="3.6"
-
+  global:
+    - GCC_VERSION="4.9"
+    - CLANG_VERSION="3.6"
+  matrix:
+    - BUILD_TYPE=Debug
 addons:
   apt:
     sources:
@@ -42,4 +43,4 @@ addons:
     - cmake
     - clang-${CLANG_VERSION}
     - g++-${GCC_VERSION}
-    - boost1.55
+    - libboost1.55-dev
