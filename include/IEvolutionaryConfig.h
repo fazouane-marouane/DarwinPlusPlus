@@ -3,6 +3,8 @@
 #include <vector>
 #include <functional> // std::reference_wrapper
 #include <string>
+#include <algorithm>
+#include "Selection/ISelection.h"
 #include "datastructures/algorithms.h"
 
 namespace Darwin
@@ -24,9 +26,36 @@ namespace Darwin
 		public:
 			using individual_type = Individual;
 			using population_type = Population;
-			using individuals_references = std::list<std::reference_wrapper<Individual>>; // TODO: lame naming
+			using indices = std::vector<std::size_t>;
 
-			IStandardEvolutionaryConfig(GoalFunction _goalFunction) : goalFunction(_goalFunction){}
+			IStandardEvolutionaryConfig(GoalFunction _goalFunction,
+										SelectionType _selectForCrossOver = nullptr,
+										SelectionType _selectForMutation = nullptr,
+										SelectionType _selectForRemoval = nullptr) :
+				goalFunction(_goalFunction),
+				selectForCrossOver(_selectForCrossOver),
+				selectForMutation(_selectForMutation),
+				selectForRemoval(_selectForRemoval)
+			{}
+
+			// setters
+
+			void setSelectionForCrossOver(SelectionType _selectForCrossOver)
+			{
+				selectForCrossOver = _selectForCrossOver;
+			}
+
+			void setSelectionForMutation(SelectionType _selectForMutation)
+			{
+				selectForMutation = _selectForMutation;
+			}
+
+			void setSelectionForRemoval(SelectionType _selectForRemoval)
+			{
+				selectForRemoval = _selectForRemoval;
+			}
+
+			// Genetic Algorithms
 
 			virtual IEvolutionaryConfig& init()
 			{
@@ -37,33 +66,29 @@ namespace Darwin
 			virtual IEvolutionaryConfig& breed()
 			{
 				// Cross Over
-				auto newIndividuals = crossOver(selectForCrossOver(population));
+				auto newIndividuals = crossOver(population, (*selectForCrossOver)(population));
 				// Mutation
-				auto mutants = mutate(selectForMutation(population));
+				auto mutants = mutate(population, (*selectForMutation)(population));
 				// Merge these new individuals into the original population
 				Darwin::utility::merge(population, newIndividuals, mutants);
 				// sort
 				std::sort(population.begin(), population.end(),
-					[&goalFunction](Individual& lhs, Individual& rhs)
+					[this](Individual& lhs, Individual& rhs)
 					{
 						return goalFunction(lhs) < goalFunction(rhs);
 					});
 				// Natural selection
-				Darwin::utility::remove(population, selectForRemoval(population));
+				Darwin::utility::remove(population, (*selectForRemoval)(population));
 				return *this;
 			}
 
-			virtual individuals_references selectForCrossOver(population_type&, std::string = "uniform") = 0;
-
-			virtual individuals_references selectForMutation(population_type&, std::string = "uniform") = 0;
-
-			virtual std::vector<size_t> selectForRemoval(population_type&, std::string = "thresholding") = 0;
-
 			virtual void initializePopulation(population_type&, std::string method = "uniform") = 0;
 
-			virtual population_type crossOver(individuals_references const&) = 0;
+			virtual population_type crossOver(population_type population, indices const&) = 0;
 
-			virtual population_type mutate(individuals_references const&) = 0;
+			virtual population_type mutate(population_type population, indices const&) = 0;
+
+			// Getters
 
 			virtual population_type& getPopulation()
 			{
@@ -88,6 +113,9 @@ namespace Darwin
 		protected:
 			population_type population;
 			GoalFunction goalFunction;
+			SelectionType selectForCrossOver;
+			SelectionType selectForMutation;
+			SelectionType selectForRemoval;
 		};
         
 

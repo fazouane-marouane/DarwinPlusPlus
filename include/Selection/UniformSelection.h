@@ -7,7 +7,7 @@
 namespace Darwin
 {
 	template<class Distribution, class Individual, class Population, class Indices>
-	class UniformSelection: public Interfaces::ISelection<Population, GoalFunction, Indices>
+	class UniformSelection: public Interfaces::ISelection<Population, Indices>
 	{
 	public:
 		explicit UniformSelection(size_t _threshold): threshold(_threshold), dist(0,_threshold-1){}

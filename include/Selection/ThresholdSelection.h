@@ -6,7 +6,7 @@
 namespace Darwin
 {
 	template<class Individual, class Population, class Indices>
-	class ThresholdSelection: public Interfaces::ISelection<Population, GoalFunction, Indices>
+	class ThresholdSelection: public Interfaces::ISelection<Population, Indices>
 	{
 	public:
 		explicit ThresholdSelection(size_t _threshold): threshold(_threshold){}
