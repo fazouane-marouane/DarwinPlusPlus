@@ -51,6 +51,7 @@ else()
 endif(CHECK_CXX_COMPILER_USED1)
 
 
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/" ${CMAKE_MODULE_PATH})
 #target_compile_features(DarwinPP PRIVATE cxx_generic_lambdas cxx_constexpr)
 #target_compile_features(foobar PRIVATE cxx_range_for)
 
