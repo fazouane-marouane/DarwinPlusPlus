@@ -7,6 +7,7 @@
 #include <GeneticAlgorithms.h>
 #include <eigen3/Eigen/Dense>
 #include <Random/discrete_distribution.h>
+#include <modules/permutation/permutation.h>
 
 using namespace Eigen;
 using Individual = std::vector<int>;
@@ -39,14 +40,18 @@ namespace Darwin
 	}
 }
 
-std::ostream& operator<<(std::ostream& os, const std::vector<int>& vec)
+
+
+
+template<typename T>
+std::ostream& operator<<(std::ostream& os, const std::vector<T>& vec)
 {
-    os << '[ ';
+    os << "[ ";
     for (auto& el : vec)
     {
         os << el << ' ';
     }
-    os << ' ]';
+    os << " ]";
     return os;
 }
 
@@ -57,7 +62,8 @@ class testEvolutionaryConfig : public Darwin::ProbabilisticEvolutionaryConfig<Go
 	using base = Darwin::ProbabilisticEvolutionaryConfig<GoalFunction, Individual, std::vector<Individual>>;
 public :
 	using base::base;
-	testEvolutionaryConfig(GoalFunction goal, size_t Population_size, size_t dimension, std::vector<double> probabilities): base(goal, Population_size, Darwin::Rand::uniform_distribution<Individual>(dimension, probabilities)), mutation_dist(0, dimension-1)
+	using base::population_size;
+    testEvolutionaryConfig(GoalFunction goal, size_t Population_size, size_t dimension): base(goal, Population_size, Darwin::Rand::uniform_distribution<Darwin::Permutation>(dimension)), mutation_dist(0, dimension-1)
 	{
 	}
 
@@ -78,6 +84,12 @@ public :
 		}
 		return population_;
 	}
+    
+    virtual void initializePopulation(std::vector<Individual> & population, std::string method ="uniform")
+    {
+        while( population.size() <= population_size)
+            population.push_back(dist_initialization(gen));
+    }
 
 	Individual crossOver(Individual const& lhs, Individual const& rhs)
 	{
@@ -125,7 +137,7 @@ public :
 
 	virtual bool goalReached()
 	{
-		return counter++ > 50;
+		return counter++ > 10000;
 	}
 
 	void printBest() const
@@ -143,12 +155,18 @@ public :
 };
 
 template<class GoalFunction>
-testEvolutionaryConfig<GoalFunction> make_testEvolutionaryConfig(GoalFunction goal, size_t size, size_t dimension, std::vector<double> probabilities)
+testEvolutionaryConfig<GoalFunction> make_testEvolutionaryConfig(GoalFunction goal, size_t size, size_t dimension)
 {
-	return testEvolutionaryConfig<GoalFunction>(goal, size, dimension, probabilities);
+	return testEvolutionaryConfig<GoalFunction>(goal, size, dimension);
 }
 
 
+Vector2f getCoordonnate(int i){
+    Vector2f city;
+    city(0) = i%5;
+    city(1) = i/5;
+    return city;
+}
 
 
 
@@ -162,17 +180,22 @@ int main()
 		cities(1,i) = i/5;
 	}
 
+    
 	MatrixXf cityMap(nbCities, nbCities);
 	for (int i = 0; i < nbCities; i++)
-		for (int j = 0; j < nbCities; j++)
-			cityMap(i,j)= sqrt(i^2 + j^2);
+		for (int j = 0; j < nbCities; j++){
+        	Vector2f city_i = getCoordonnate(i);
+            Vector2f city_j = getCoordonnate(j);
+			cityMap(i,j)= std::sqrt(std::pow(city_i(0)-city_j(0),2)+ std::pow(city_i(1)-city_j(1),2));			
+		}
+
 
 	auto goalFunction = [&cityMap](std::vector<int> individual)
 	{
 		float s = 0;
 		for (int i = 0; i < individual.size()-1; i++)
 		{
-			s -= cityMap(individual.at(i) % cityMap.rows(),individual.at(i+1) % cityMap.rows());
+			s -= 10*cityMap(individual.at(i) % cityMap.rows(),individual.at(i+1) % cityMap.rows());
 			//s -= sqrt((individual[i]/5-individual[i+1]/5)^2 + ((individual[i]%5)-individual[i+1]%5)^2);
 			for (int j = 0; j < individual.size()-1; j++)
 			{
@@ -197,10 +220,11 @@ int main()
 	// 	}
 	// 	return s;
 	// };
-	std::vector<double> probabilities;
-	for (int i = 0; i < nbCities; i++)
-		probabilities.push_back(1/double(nbCities));
-	auto config = make_testEvolutionaryConfig(goalFunction, 20, nbCities, probabilities);
+//	std::vector<double> probabilities;
+//	for (int i = 0; i < nbCities; i++)
+//		probabilities.push_back(1/double(nbCities));
+//    std::cout << probabilities << std::endl;
+	auto config = make_testEvolutionaryConfig(goalFunction, 50, nbCities);
 	Darwin::GeneticAlgorithmLoop(config);
     config.print();
 	config.printBest();
