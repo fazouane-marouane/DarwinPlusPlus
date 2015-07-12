@@ -40,6 +40,6 @@ addons:
     - boost-latest
     packages:
     - cmake
-	- clang-${CLANG_VERSION}
+    - clang-${CLANG_VERSION}
     - g++-${GCC_VERSION}
     - boost1.55
