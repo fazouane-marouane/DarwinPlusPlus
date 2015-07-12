@@ -29,7 +29,7 @@ os:
 
 env:
   global:
-    - GCC_VERSION="5.1"
+    - GCC_VERSION="5"
     - CLANG_VERSION="3.6"
   matrix:
     - BUILD_TYPE=Debug
@@ -43,4 +43,4 @@ addons:
     - cmake
     - clang-3.6
     - g++-5
-    - libboost1.55-dev
+    - libboost1.55-all-dev
