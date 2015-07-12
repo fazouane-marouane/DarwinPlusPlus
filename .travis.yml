@@ -11,16 +11,15 @@ git:
     submodules: false
 
 before_script:
-  - if [ "$TRAVIS_OS_NAME"=="linux" ] && [ "$CXX" == "g++" ]; then export GCC_VERSION="4.9"; fi
   - if [ "$TRAVIS_OS_NAME"=="linux" ] && [ "$CXX" == "g++" ]; then export CXX_COMPILER=$(which g++-${GCC_VERSION}); fi
   - if [ "$TRAVIS_OS_NAME"=="linux" ] && [ "$CXX" == "g++" ]; then export C_COMPILER=$(which gcc-${GCC_VERSION}); fi
-  - if [ "$TRAVIS_OS_NAME"=="linux" ] && [ "$CXX" != "g++" ]; then export CXX_COMPILER=$(which clang++); fi
-  - if [ "$TRAVIS_OS_NAME"=="linux" ] && [ "$CXX" != "g++" ]; then export C_COMPILER=$(which clang); fi
+  - if [ "$TRAVIS_OS_NAME"=="linux" ] && [ "$CXX" != "g++" ]; then export CXX_COMPILER=$(which clang++-${CLANG_VERSION}); fi
+  - if [ "$TRAVIS_OS_NAME"=="linux" ] && [ "$CXX" != "g++" ]; then export C_COMPILER=$(which clang-${CLANG_VERSION}); fi
   - mkdir build
   - cd build
   - cmake --version
-  - ${CXX_COMPILER} --version
-  - ${C_COMPILER} --version
+  - $CXX_COMPILER --version
+  - $C_COMPILER --version
   - cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_COMPILER=${CXX_COMPILER} -DCMAKE_C_COMPILER=${C_COMPILER} ..
 
 script: make && ctest
@@ -30,6 +29,8 @@ os:
 
 env:
   - BUILD_TYPE=Debug
+  - GCC_VERSION="4.9"
+  - CLANG_VERSION="3.6"
 
 addons:
   apt:
@@ -39,5 +40,6 @@ addons:
     - boost-latest
     packages:
     - cmake
+	- clang-${CLANG_VERSION}
     - g++-${GCC_VERSION}
-    - libboost-all-dev
+    - boost1.55
