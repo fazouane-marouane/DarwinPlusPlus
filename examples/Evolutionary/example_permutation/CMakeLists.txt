@@ -5,12 +5,12 @@ file(GLOB_RECURSE Darwin_INC
     "${DarwinPP_SOURCE_DIR}/include/*.h"
 )
 
-file(GLOB_RECURSE Example_Evolutionary_Simple_Usage_SRC
+file(GLOB_RECURSE Example_Evolutionary_Permutation_SRC
     "*.h"
     "*.cpp"
 )
 
-add_executable (example_Evolutionary_simple_usage ${Darwin_INC} ${Example_Evolutionary_Simple_Usage_SRC})
+add_executable (example_Evolutionary_permutation ${Darwin_INC} ${Example_Evolutionary_Permutation_SRC})
 
-target_link_libraries(example_Evolutionary_simple_usage
+target_link_libraries(example_Evolutionary_permutation 
                        Darwin)

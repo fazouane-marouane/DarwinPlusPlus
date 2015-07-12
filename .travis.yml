@@ -4,36 +4,43 @@ compiler:
   - gcc
   - clang
 
-sudo: true
+sudo: false
 
 # Handle git submodules yourself
 git:
     submodules: false
 
 before_script:
-  - if [ "$TRAVIS_OS_NAME"=="linux" ] && [ "$CXX" == "g++" ]; then export GCC_VERSION="4.9"; fi
-  - if [ "$TRAVIS_OS_NAME"=="linux" ] && [ "$CXX" == "g++" ]; then sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi
-  - if [ "$TRAVIS_OS_NAME"=="linux" ] && [ "$CXX" == "clang++" ]; then sudo add-apt-repository -y ppa:h-rayflood/llvm; fi
-  - if [ "$TRAVIS_OS_NAME"=="linux" ]; then sudo apt-get update -qq; fi
-  - if [ "$TRAVIS_OS_NAME"=="linux" ] && [ "$CXX" == "g++" ]; then sudo apt-get install -qq g++-${GCC_VERSION}; fi
-  - if [ "$TRAVIS_OS_NAME"=="linux" ] && [ "$CXX" == "g++" ]; then sudo apt-get install -qq gcc-${GCC_VERSION}; fi
-  - if [ "$TRAVIS_OS_NAME"=="linux" ] && [ "$CXX" == "g++" ]; then sudo ln -s -v -f $(which g++-${GCC_VERSION}) /usr/bin/g++; fi
-  - if [ "$TRAVIS_OS_NAME"=="linux" ] && [ "$CXX" == "g++" ]; then sudo ln -s -v -f $(which gcc-${GCC_VERSION}) /usr/bin/gcc; fi
-  - if [ "$TRAVIS_OS_NAME"=="linux" ]; then sudo apt-get install -qq libboost-all-dev; fi
+  - if [ "$TRAVIS_OS_NAME"=="linux" ] && [ "$CXX" == "g++" ]; then export CXX_COMPILER=$(which g++-${GCC_VERSION}); fi
+  - if [ "$TRAVIS_OS_NAME"=="linux" ] && [ "$CXX" == "g++" ]; then export C_COMPILER=$(which gcc-${GCC_VERSION}); fi
+  - if [ "$TRAVIS_OS_NAME"=="linux" ] && [ "$CXX" != "g++" ]; then export CXX_COMPILER=$(which clang++-${CLANG_VERSION}); fi
+  - if [ "$TRAVIS_OS_NAME"=="linux" ] && [ "$CXX" != "g++" ]; then export C_COMPILER=$(which clang-${CLANG_VERSION}); fi
   - mkdir build
   - cd build
   - cmake --version
-  - cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} ..
+  - $CXX_COMPILER --version
+  - $C_COMPILER --version
+  - cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_COMPILER=${CXX_COMPILER} -DCMAKE_C_COMPILER=${C_COMPILER} ..
 
 script: make && ctest
 
 os:
   - linux
-  - osx
 
 env:
-  - BUILD_TYPE=Debug
-
-matrix:
-  allow_failures:
-    - os: osx
+  global:
+    - GCC_VERSION="5"
+    - CLANG_VERSION="3.6"
+  matrix:
+    - BUILD_TYPE=Debug
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    - llvm-toolchain-precise-3.6
+    - boost-latest
+    packages:
+    - cmake
+    - clang-3.6
+    - g++-5
+    - libboost1.55-all-dev

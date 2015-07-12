@@ -50,7 +50,7 @@ void example_uniform_distribution_string2(Generator gen)
 	auto rand = [&]() { return dis(gen); };
 	std::map<std::string, size_t, Darwin::utility::string_length_then_alphabetical_ordering> histogram;
 	size_t number_of_samples = 1'000'000;
-	double mean = number_of_samples / 14;
+	double mean = (number_of_samples+0.0L) / 14;
 
 	for (size_t count = 0; count < number_of_samples; ++count)
 	{
@@ -65,7 +65,7 @@ void example_uniform_distribution_string2(Generator gen)
 		std::cout <<" --> "<< entry.first << ":\t" << entry.second << std::endl;
 	}
 	std::cout << std::endl;
-	deviation = std::sqrt(deviation);
+	deviation = std::sqrt(deviation/ number_of_samples);
 	std::cout <<"deviation: "<< deviation << std::endl;
 }
 
