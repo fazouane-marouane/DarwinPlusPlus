@@ -26,13 +26,10 @@ namespace Darwin
 		using typename base::population_type;
 		using typename base::individuals_references;
 		using typename base::individual_type;
-		using base::population_size;
-		using base::goalFunction;
-		using base::population;
 
 		// sampling: multinomial distribution
-		ProbabilisticEvolutionaryConfig(GoalFunction goal, size_t _population_size) : base(goal, _population_size) {}
-		ProbabilisticEvolutionaryConfig(GoalFunction goal, size_t _population_size, uniform_individual_distribution dist): base(goal, _population_size), dist_initialization(dist){}
+		ProbabilisticEvolutionaryConfig(GoalFunction goal, size_t _population_size) : base(goal, _population_size), population_size(_population_size) {}
+		ProbabilisticEvolutionaryConfig(GoalFunction goal, size_t _population_size, uniform_individual_distribution dist): base(goal), population_size(_population_size), dist_initialization(dist){}
 
 		virtual individuals_references selectForCrossOver(population_type& population, std::string method = "uniform")
 		{
@@ -107,9 +104,11 @@ namespace Darwin
 				throw NotImplementedException();
 		}
 
-		virtual std::vector<size_t> selectForRemoval_thresholding(population_type& population){
+		virtual std::vector<size_t> selectForRemoval_thresholding(population_type& population)
+		{
+			auto& goalFunction = this->getGoalFunction();
 			std::sort(population.begin(), population.end(),
-				[this](individual_type& indiv1, individual_type& indiv2)
+				[&goalFunction](individual_type& indiv1, individual_type& indiv2)
 				{
 					return goalFunction(indiv1) < goalFunction(indiv2);
 				});
@@ -121,11 +120,21 @@ namespace Darwin
 
 		virtual void initializePopulation(population_type& population, std::string method = "uniform")
 		{
-			// distribution: uniform by default
-			while ( population.size() <= population_size )
-			    population.push_back(dist_initialization(gen));
+			// Uniform by default
+			if (method == "uniform")
+				return initializePopulation_uniform(population);
+			else
+				throw NotImplementedException();
 		}
+
+		virtual void initializePopulation_uniform(population_type& population)
+		{
+			while ( population.size() <= population_size )
+				population.push_back(dist_initialization(gen));
+		}
+
 	protected:
+		size_t population_size;
 		Rand::uniform_distribution<Individual> dist_initialization;
 		std::mt19937 gen = std::mt19937(std::random_device()());
 	};

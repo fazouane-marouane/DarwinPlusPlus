@@ -36,7 +36,7 @@ namespace Darwin
 		class uniform_distribution<std::vector<bool>>
 		{
 		public:
-			uniform_distribution(size_t _size): size(_size), dists(_size, std::bernoulli_distribution(0.5))
+			explicit uniform_distribution(size_t _size): dists(_size, std::bernoulli_distribution(0.5)), size(_size)
 			{}
 
 			template<class Generator>

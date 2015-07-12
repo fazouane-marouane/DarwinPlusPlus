@@ -73,7 +73,9 @@ public :
 
 	void printBest() const
 	{
-		auto best = *std::max_element(std::begin(population), std::end(population), [this](auto lhs, auto rhs)
+		auto& goalFunction = this->getGoalFunction();
+		auto& population = this->getPopulation();
+		auto best = *std::max_element(std::begin(population), std::end(population), [&goalFunction](auto lhs, auto rhs)
 		{ return goalFunction(lhs) < goalFunction(rhs); });
 		std::cout << "count: " << counter << " -- best score: " << goalFunction(best) << std::endl;
 		std::cout<< " --best :"<< best << std::endl;
