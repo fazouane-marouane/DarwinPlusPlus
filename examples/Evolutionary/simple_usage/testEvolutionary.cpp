@@ -5,55 +5,13 @@
 #include <modules/bitstring/bitstring.h>
 #include <ProbabilisticEvolutionaryConfig.h>
 #include <GeneticAlgorithms.h>
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Dense>
 #include <Random/discrete_distribution.h>
 #include <modules/permutation/permutation.h>
 
 using namespace Eigen;
 using Individual = Darwin::Permutation;
 
-namespace Darwin
-{
-	namespace Rand
-	{
-		template<>
-		class uniform_distribution<std::vector<int>>
-		{
-		public:
-			uniform_distribution(size_t _size, std::vector<double> probabilities): size(_size), dists(make_distribution(probabilities))
-			{}
-			template<class Generator>
-			std::vector<int> operator()(Generator& gen)
-			{
-				std::vector<int> ret;
-				ret.reserve(size);
-				for(size_t position = 0; position < size; ++position)
-				{
-					ret.push_back(dists(gen));
-				}
-				return ret;
-			}
-		private:
-			discrete_distribution<double> dists;
-			size_t const size;
-		};
-	}
-}
-
-
-
-
-template<typename T>
-std::ostream& operator<<(std::ostream& os, const std::vector<T>& vec)
-{
-    os << "[ ";
-    for (auto& el : vec)
-    {
-        os << el << ' ';
-    }
-    os << " ]";
-    return os;
-}
 
 
 template<class GoalFunction>

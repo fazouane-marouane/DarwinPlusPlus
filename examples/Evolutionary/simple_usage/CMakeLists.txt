@@ -1,4 +1,5 @@
-include_directories (${DarwinPP_SOURCE_DIR}/include)
+find_package( Eigen3 REQUIRED )
+include_directories (${DarwinPP_SOURCE_DIR}/include ${EIGEN_INCLUDE_DIR} )
 
 file(GLOB_RECURSE Darwin_INC
     "${DarwinPP_SOURCE_DIR}/include/*.h"
