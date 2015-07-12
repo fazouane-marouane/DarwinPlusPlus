@@ -19,6 +19,8 @@ before_script:
   - mkdir build
   - cd build
   - cmake --version
+  - ${CXX_COMPILER} --version
+  - ${C_COMPILER} --version
   - cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_COMPILER=${CXX_COMPILER} -DCMAKE_C_COMPILER=${C_COMPILER} ..
 
 script: make && ctest
@@ -37,8 +39,9 @@ matrix:
 addons:
   apt:
     sources:
-    - ubuntu-toolchain-r/test
-    - h-rayflood/llvm
+    - ubuntu-toolchain-r-test
+    - llvm-toolchain-precise-3.6
+	- boost-latest
     packages:
         - cmake
         - g++-${GCC_VERSION}
