@@ -10,7 +10,7 @@
 #include <modules/permutation/permutation.h>
 
 using namespace Eigen;
-using Individual = std::vector<int>;
+using Individual = Darwin::Permutation;
 
 namespace Darwin
 {
@@ -93,16 +93,16 @@ public :
 
 	Individual crossOver(Individual const& lhs, Individual const& rhs)
 	{
-		if (lhs.size() != rhs.size())
+		if (lhs.get().size() != rhs.get().size())
 			throw std::runtime_error("Two population do not have same size");
-		std::vector<int> v(lhs.size());
-		for (int i = 0; i < lhs.size() ; i++){
+		std::vector<size_t> v(lhs.get().size());
+		for (int i = 0; i < lhs.get().size() ; i++){
 			if (i%2 == 0) 
-				v[i] = lhs[i];
+				v[i] = lhs.get()[i];
 			else 
-				v[i] = rhs[i];
+				v[i] = rhs.get()[i];
 		}
-		return v;
+		return Individual(v);
 	}
 
 	virtual std::vector<Individual> mutate(individuals_references const & mutants)
@@ -115,15 +115,15 @@ public :
 
 	Individual mutate(Individual m)
 	{
-		Darwin::Rand::uniform_distribution<int> dist(1,m.size()-1);
+		Darwin::Rand::uniform_distribution<int> dist(1,m.get().size()-1);
 		int permutation_index = dist(gen);
-		if (permutation_index != m.size()-1){
-			m[permutation_index] = m[permutation_index + 1];
-			m[permutation_index + 1] = m[permutation_index]; 
+		if (permutation_index != m.get().size()-1){
+			m.get()[permutation_index] = m.get()[permutation_index + 1];
+			m.get()[permutation_index + 1] = m.get()[permutation_index]; 
 		}
 		else{
-			m[permutation_index] = m[permutation_index-1];
-			m[permutation_index-1] = m[permutation_index];
+			m.get()[permutation_index] = m.get()[permutation_index-1];
+			m.get()[permutation_index-1] = m.get()[permutation_index];
 		}
 		return m;
 	}
@@ -190,21 +190,21 @@ int main()
 		}
 
 
-	auto goalFunction = [&cityMap](std::vector<int> individual)
+	auto goalFunction = [&cityMap](Individual const& individual)
 	{
 		float s = 0;
-		for (int i = 0; i < individual.size()-1; i++)
+		for (int i = 0; i < individual.get().size()-1; i++)
 		{
-			s -= 10*cityMap(individual.at(i) % cityMap.rows(),individual.at(i+1) % cityMap.rows());
+			s -= 10*cityMap(individual.get().at(i) % cityMap.rows(),individual.get().at(i+1) % cityMap.rows());
 			//s -= sqrt((individual[i]/5-individual[i+1]/5)^2 + ((individual[i]%5)-individual[i+1]%5)^2);
-			for (int j = 0; j < individual.size()-1; j++)
+			for (int j = 0; j < individual.get().size()-1; j++)
 			{
-				s -= ((individual[i] == individual[j]) ? 100 : 0);
+				s -= ((individual.get()[i] == individual.get()[j]) ? 100 : 0);
 			}
 		}
 		return s;
 	};
-
+	
 	// // Get result of maximisation
 
 	// auto config = make_testEvolutionaryConfig(goalFunction, 100, nbCities*nbCities);
@@ -224,7 +224,7 @@ int main()
 //	for (int i = 0; i < nbCities; i++)
 //		probabilities.push_back(1/double(nbCities));
 //    std::cout << probabilities << std::endl;
-	auto config = make_testEvolutionaryConfig(goalFunction, 50, nbCities);
+	auto config = make_testEvolutionaryConfig(goalFunction, 50, 9);
 	Darwin::GeneticAlgorithmLoop(config);
     config.print();
 	config.printBest();
