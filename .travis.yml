@@ -27,22 +27,17 @@ script: make && ctest
 
 os:
   - linux
-  - osx
 
 env:
   - BUILD_TYPE=Debug
 
-matrix:
-  allow_failures:
-    - os: osx
-
 addons:
   apt:
     sources:
-	  - ubuntu-toolchain-r-test
-	  - llvm-toolchain-precise-3.6
-	  - boost-latest
+    - ubuntu-toolchain-r-test
+    - llvm-toolchain-precise-3.6
+    - boost-latest
     packages:
-      - cmake
-      - g++-${GCC_VERSION}
-      - libboost-all-dev
+    - cmake
+    - g++-${GCC_VERSION}
+    - libboost-all-dev
