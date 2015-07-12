@@ -32,7 +32,7 @@ namespace Darwin
 
 		// sampling: multinomial distribution
 		ProbabilisticEvolutionaryConfig(GoalFunction goal, size_t _population_size) : base(goal, _population_size) {}
-		ProbabilisticEvolutionaryConfig(GoalFunction goal, size_t _population_size, uniform_individual_distribution dist): base(goal, _population_size), dist_initialization(dist){}
+		ProbabilisticEvolutionaryConfig(GoalFunction goal, size_t _population_size, uniform_individual_distribution dist, double _alpha_mutate, double _alpha_crossOver): base(goal, _population_size), dist_initialization(dist), alpha_mutate(_alpha_mutate), alpha_crossOver(_alpha_crossOver){}
 
 		virtual individuals_references selectForCrossOver(population_type& population, std::string method = "uniform")
 		{
@@ -51,7 +51,7 @@ namespace Darwin
 			// other methods: Tournament, SCX
 			// select over a population container
 			Darwin::Rand::uniform_distribution<size_t> disCrossOver_uniform(0, population.size()-1);
-			size_t N = static_cast<size_t>(population_size*(0.3));
+			size_t N = static_cast<size_t>(population_size*(alpha_crossOver));
 			auto rand = [&]() { return disCrossOver_uniform(gen); };
 			std::vector<size_t> Values;
 
@@ -81,7 +81,7 @@ namespace Darwin
 		virtual individuals_references selectForMutation_uniform(population_type& population)
 		{
 			// select over a population container
-			size_t N = static_cast<size_t>(population_size*(0.3));
+			size_t N = static_cast<size_t>(population_size*(alpha_mutate));
 			Darwin::Rand::uniform_distribution<size_t> dis(0,N-1);
 			auto rand = [&]() { return dis(gen); };
 			std::vector<size_t> Values;
@@ -113,7 +113,7 @@ namespace Darwin
 				{
 					return goalFunction(indiv1) < goalFunction(indiv2);
 				});
-			size_t N = static_cast<size_t>(population_size*(0.6));   // Keep only 60 % of the population
+			size_t N = static_cast<size_t>(population_size*(alpha_mutate+alpha_crossOver)/(1+alpha_mutate+alpha_crossOver));   // Keep a constant size of population
 			std::vector<size_t> v(N);
 			std::generate(v.rbegin(), v.rend(), [n = 0U]() mutable { return n++;});
             return v;
@@ -128,5 +128,8 @@ namespace Darwin
 	protected:
 		Rand::uniform_distribution<Individual> dist_initialization;
 		std::mt19937 gen = std::mt19937(std::random_device()());
+		double alpha_mutate;
+		double alpha_crossOver;
+		
 	};
 }
