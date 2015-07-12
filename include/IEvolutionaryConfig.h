@@ -42,6 +42,12 @@ namespace Darwin
 				auto mutants = mutate(selectForMutation(population));
 				// Merge these new individuals into the original population
 				Darwin::utility::merge(population, newIndividuals, mutants);
+				// sort
+				std::sort(population.begin(), population.end(),
+					[&goalFunction](Individual& lhs, Individual& rhs)
+					{
+						return goalFunction(lhs) < goalFunction(rhs);
+					});
 				// Natural selection
 				Darwin::utility::remove(population, selectForRemoval(population));
 				return *this;

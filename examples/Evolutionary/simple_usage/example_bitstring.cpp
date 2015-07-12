@@ -15,8 +15,7 @@ class testEvolutionaryConfig : public Darwin::ProbabilisticEvolutionaryConfig<Go
 public :
 	using base::base;
 	testEvolutionaryConfig(GoalFunction goal, size_t Population_size, size_t dimension): base(goal, Population_size, Darwin::Rand::uniform_distribution<Individual>(dimension)), mutation_dist(0, dimension-1)
-	{
-	}
+	{}
 
 	using typename base::individual_type;
 	using typename base::individuals_references;
