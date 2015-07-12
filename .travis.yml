@@ -39,10 +39,10 @@ matrix:
 addons:
   apt:
     sources:
-    - ubuntu-toolchain-r-test
-    - llvm-toolchain-precise-3.6
-	- boost-latest
+	  - ubuntu-toolchain-r-test
+	  - llvm-toolchain-precise-3.6
+	  - boost-latest
     packages:
-        - cmake
-        - g++-${GCC_VERSION}
-        - libboost-all-dev
+      - cmake
+      - g++-${GCC_VERSION}
+      - libboost-all-dev
