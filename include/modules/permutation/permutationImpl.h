@@ -8,7 +8,7 @@ namespace Darwin
 	{
 	public:
 		explicit Permutation(size_t _size);
-		explicit Permutation(std::vector<size_t> permutation);
+		Permutation(std::vector<size_t> permutation);
 		std::vector<size_t> const& get() const;
 		std::vector<size_t>& get();
 
@@ -16,7 +16,7 @@ namespace Darwin
 		void compose(Permutation const& other);
 
 	private:
-		int size;
+		size_t size;
 		std::vector<size_t> _internal;
 	};
 }

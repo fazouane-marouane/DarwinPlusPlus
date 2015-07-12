@@ -4,6 +4,7 @@
 #include <vector>
 #include "permutationImpl.h"
 #include <algorithm>
+#include <cassert>
 
 namespace Darwin
 {
@@ -15,8 +16,9 @@ namespace Darwin
 		public:
 			uniform_distribution(size_t _size): size(_size), dists(_size), simple_permutation(_size)
 			{
-				for (size_t itr = size - 1; itr >= 0; --itr)
-					dists[itr] = uniform_distribution<size_t>(0, itr);
+				assert(size > 0);
+				for (size_t itr = 0; itr < size; ++itr)
+					dists[itr] = uniform_distribution<size_t>(0, size-1-itr);
 				size_t n = 0U;
 				std::generate(std::begin(simple_permutation), std::end(simple_permutation), [&n] { return n++; });
 			}
@@ -25,16 +27,16 @@ namespace Darwin
 			Permutation operator()(Generator& gen)
 			{
 				std::vector<size_t> result;
-				ret.reserve(size);
+				result.reserve(size);
 				auto permutation = simple_permutation;
 				for(size_t position = 0; position < size; ++position)
 				{
 					auto pos = dists[position](gen);
 					auto itr = permutation.begin() + pos;
-					ret.push_back(*itr);
+					result.push_back(*itr);
 					permutation.erase(itr);
 				}
-				return ret;
+				return Permutation(result);
 			}
 		private:
 			size_t const size;
