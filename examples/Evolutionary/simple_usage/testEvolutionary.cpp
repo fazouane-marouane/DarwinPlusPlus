@@ -64,7 +64,7 @@ public :
 	using base::base;
 	using base::population_size;
 	using base::dist_initialization;
-    testEvolutionaryConfig(GoalFunction goal, size_t Population_size, size_t dimension): base(goal, Population_size, Darwin::Rand::uniform_distribution<Darwin::Permutation>(dimension)), mutation_dist(0, dimension-1)
+    testEvolutionaryConfig(GoalFunction goal, size_t Population_size, size_t dimension, double _alpha_mutate, double _alpha_crossOver): base(goal, Population_size, Darwin::Rand::uniform_distribution<Darwin::Permutation>(dimension), _alpha_mutate, _alpha_crossOver), mutation_dist(0, dimension-1)
 	{
 	}
 
@@ -143,7 +143,7 @@ public :
 
 	virtual bool goalReached()
 	{
-		return counter++ > 10000;
+		return counter++ > 50 ;
 	}
 
 	void printBest() const
@@ -161,16 +161,16 @@ public :
 };
 
 template<class GoalFunction>
-testEvolutionaryConfig<GoalFunction> make_testEvolutionaryConfig(GoalFunction goal, size_t size, size_t dimension)
+testEvolutionaryConfig<GoalFunction> make_testEvolutionaryConfig(GoalFunction goal, size_t size, size_t dimension, double alpha_mutate, double alpha_crossOver)
 {
-	return testEvolutionaryConfig<GoalFunction>(goal, size, dimension);
+	return testEvolutionaryConfig<GoalFunction>(goal, size, dimension, alpha_mutate, alpha_crossOver);
 }
 
 
 Vector2f getCoordonnate(int i){
     Vector2f city;
-    city(0) = i%5;
-    city(1) = i/5;
+    city(0) = i%3;
+    city(1) = i/3;
     return city;
 }
 
@@ -179,15 +179,7 @@ Vector2f getCoordonnate(int i){
 int main()
 {
 	int nbCities = 9;
-	MatrixXf cities(2,nbCities);
-	for (int i = 0; i < nbCities; i++)
-	{
-		cities(0,i) = i%5;
-		cities(1,i) = i/5;
-	}
-
-    
-	MatrixXf cityMap(nbCities, nbCities);
+    MatrixXf cityMap(nbCities, nbCities);
 	for (int i = 0; i < nbCities; i++)
 		for (int j = 0; j < nbCities; j++){
         	Vector2f city_i = getCoordonnate(i);
@@ -202,12 +194,12 @@ int main()
 		float s = 0;
 		for (int i = 0; i < individual.get().size()-1; i++)
 		{
-			s -= 10*cityMap(individual.get().at(i) % cityMap.rows(),individual.get().at(i+1) % cityMap.rows());
+			s -= cityMap(individual.get().at(i), individual.get().at(i+1));
 			//s -= sqrt((individual[i]/5-individual[i+1]/5)^2 + ((individual[i]%5)-individual[i+1]%5)^2);
-			for (int j = 0; j < individual.get().size()-1; j++)
-			{
-				s -= ((individual.get().at(i) == individual.get()[j]) ? 100 : 0);
-			}
+			//for (int j = 0; j < individual.get().size()-1; j++)
+			// {
+			// 	s -= ((individual.get().at(i) == individual.get()[j]) ? 100 : 0);
+			// }
 		}
 		return s;
 	};
@@ -231,7 +223,10 @@ int main()
 //	for (int i = 0; i < nbCities; i++)
 //		probabilities.push_back(1/double(nbCities));
 //    std::cout << probabilities << std::endl;
-	auto config = make_testEvolutionaryConfig(goalFunction, 50, 9);
+	int population_size = 100;
+	double alpha_mutate = 0.3;
+	double alpha_crossOver = 0.3;
+	auto config = make_testEvolutionaryConfig(goalFunction, population_size, nbCities, alpha_mutate, alpha_crossOver);
 	Darwin::GeneticAlgorithmLoop(config);
     config.print();
 	config.printBest();
