@@ -2,16 +2,13 @@
 #include <iostream>
 #include <functional>
 // darwin
-#include <IEvolutionaryConfig.h>
+#include <modules/bitstring/bitstring.h>
 #include <GeneticAlgorithms.h>
-#include <Eigen/Dense>
-#include <modules/permutation/permutation.h>
 #include <Initialization/RandomInitialization.h>
 #include <Selection/ThresholdSelection.h>
 #include <Selection/UniformSelection.h>
 
-using namespace Eigen;
-using Individual = Darwin::Permutation;
+using Individual = std::vector<bool>;
 using Population = std::vector<Individual>;
 
 template<class GoalFunction>
@@ -24,22 +21,24 @@ public :
 
 	Individual crossOver(Individual const& lhs, Individual const& rhs)
 	{
-		return lhs*rhs;
+		if(dist(gen))
+			return lhs & rhs;
+		else
+			return lhs | rhs;
 	}
 
 	Individual mutate(Individual m)
 	{
-		int permutation_index1 = mutation_dist(gen);
-		int permutation_index2 = mutation_dist(gen);
-		m.transpose(permutation_index1, permutation_index2);
+		auto pos = mutation_dist(gen);
+		m[pos] = !m[pos];
 		return m;
 	}
 
 	virtual bool goalReached()
 	{
-		return counter++ > 50 ;
+		return counter++ > 100;
 	}
-    
+
 	void print()
 	{
 		auto& population = this->getPopulation();
@@ -60,54 +59,35 @@ public :
 
 private:
 	size_t counter = 0;
+	std::bernoulli_distribution dist;
 	Darwin::Rand::uniform_distribution<size_t> mutation_dist;
 	std::mt19937 gen = std::mt19937(std::random_device()());
 };
 
 template<class GoalFunction>
-testEvolutionaryConfig<GoalFunction> make_testEvolutionaryConfig(GoalFunction&& goal, size_t dimension)
+testEvolutionaryConfig<GoalFunction> make_testEvolutionaryConfig(GoalFunction goal, size_t dimension)
 {
-	return testEvolutionaryConfig<GoalFunction>(std::forward<GoalFunction>(goal), dimension);
+	return testEvolutionaryConfig<GoalFunction>(goal, dimension);
 }
 
-
-Vector2f getCoordonnate(int i, int nbCities){
-    Vector2f city;
-    city(0) = i % std::sqrt(nbCities);
-    city(1) = i/int(std::sqrt(nbCities));
-    return city;
-}
 
 int main()
 {
 	using namespace Darwin;
-	// Data
-	int nbCities = 9;
-    MatrixXf cityMap(nbCities, nbCities);
-	for (int i = 0; i < nbCities; i++)
-		for (int j = 0; j < nbCities; j++){
-        	Vector2f city_i = getCoordonnate(i, nbCities);
-            Vector2f city_j = getCoordonnate(j, nbCities);
-			cityMap(i,j)= std::sqrt(std::pow(city_i(0)-city_j(0),2)+ std::pow(city_i(1)-city_j(1),2));			
-		}
-
-	std::cout << cityMap << std::endl;
-
-	auto goalFunction = [&cityMap](Individual const& individual)
+	auto goalFunction = [](std::vector<bool> const& individual)
 	{
 		float s = 0;
-		for (int i = 0; i < individual.get().size()-1; i++)
+		for(auto v: individual)
 		{
-			s -= cityMap(individual.get().at(i), individual.get().at(i+1));
+			s += v;
 		}
 		return s;
 	};
-	// Problem solving
 
-	size_t population_size = 10000;
-	size_t dimension = nbCities;
-	double alpha_mutate = 0.3;
-	double alpha_crossOver = 0.3;
+	size_t population_size = 100;
+	size_t dimension = 1000;
+	double alpha_mutate = 0.4;
+	double alpha_crossOver = 0.6;
 	double alpha_removal =(alpha_mutate+alpha_crossOver)/(1+alpha_mutate+alpha_crossOver);
 	auto config = make_testEvolutionaryConfig(goalFunction, dimension);
 
@@ -117,9 +97,8 @@ int main()
 	config.setSelectionForMutation(make_selection<UniformSelection<Individual>>(alpha_mutate, population_size));
 	config.setSelectionForRemoval(make_selection<ThresholdSelection<Individual>>(alpha_removal));
 
-	// run
-	Darwin::GeneticAlgorithmLoop(config);
-    config.print();
+	GeneticAlgorithmLoop(config);
 	config.printBest();
+
     return 0;
 }

@@ -43,7 +43,7 @@ namespace Darwin
 					cumsum += p;
 					upper_limits.push_back(cumsum);
 				}
-				assert(abs(cumsum - 1.0) < std::numeric_limits<_Double>::epsilon());
+				assert(std::abs(cumsum - 1.0) < std::numeric_limits<_Double>::epsilon());
 			}
 
 			void init_with_cumulated_sums(std::vector<_Double> const& vect_sums)

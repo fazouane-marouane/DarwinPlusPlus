@@ -71,10 +71,10 @@ testEvolutionaryConfig<GoalFunction> make_testEvolutionaryConfig(GoalFunction&& 
 }
 
 
-Vector2f getCoordonnate(int i, int nbCities){
+Vector2f getCoordonnate(int i){
     Vector2f city;
-    city(0) = i % std::sqrt(nbCities);
-    city(1) = i/int(std::sqrt(nbCities));
+    city(0) = i%3;
+    city(1) = i/3;
     return city;
 }
 
@@ -86,8 +86,8 @@ int main()
     MatrixXf cityMap(nbCities, nbCities);
 	for (int i = 0; i < nbCities; i++)
 		for (int j = 0; j < nbCities; j++){
-        	Vector2f city_i = getCoordonnate(i, nbCities);
-            Vector2f city_j = getCoordonnate(j, nbCities);
+        	Vector2f city_i = getCoordonnate(i);
+            Vector2f city_j = getCoordonnate(j);
 			cityMap(i,j)= std::sqrt(std::pow(city_i(0)-city_j(0),2)+ std::pow(city_i(1)-city_j(1),2));			
 		}
 
@@ -104,7 +104,7 @@ int main()
 	};
 	// Problem solving
 
-	size_t population_size = 10000;
+	size_t population_size = 100;
 	size_t dimension = nbCities;
 	double alpha_mutate = 0.3;
 	double alpha_crossOver = 0.3;

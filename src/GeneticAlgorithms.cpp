@@ -1,6 +1,6 @@
 #include <GeneticAlgorithms.h>
 #include <GeneticAlgorithms/GeneticAlgorithmsImpl.h>
-#include <ProbabilisticEvolutionaryConfig.h>
+#include <IEvolutionaryConfig.h>
 
 using namespace Darwin::Interfaces;
 
