@@ -3,37 +3,21 @@
 #include <functional>
 // darwin
 #include <modules/bitstring/bitstring.h>
-#include <ProbabilisticEvolutionaryConfig.h>
 #include <GeneticAlgorithms.h>
+#include <Initialization/RandomInitialization.h>
+#include <Selection/ThresholdSelection.h>
+#include <Selection/UniformSelection.h>
 
 using Individual = std::vector<bool>;
+using Population = std::vector<Individual>;
 
 template<class GoalFunction>
-class testEvolutionaryConfig : public Darwin::ProbabilisticEvolutionaryConfig<GoalFunction, Individual, std::vector<Individual>>
+class testEvolutionaryConfig : public Darwin::Interfaces::IStandardEvolutionaryConfig<GoalFunction, Individual, Population>
 {
-	using base = Darwin::ProbabilisticEvolutionaryConfig<GoalFunction, Individual, std::vector<Individual>>;
+	using base = Darwin::Interfaces::IStandardEvolutionaryConfig<GoalFunction, Individual, Population>;
 public :
-	using base::base;
-	testEvolutionaryConfig(GoalFunction goal, size_t Population_size, size_t dimension): base(goal, Population_size, Darwin::Rand::uniform_distribution<Individual>(dimension)), mutation_dist(0, dimension-1)
+	testEvolutionaryConfig(GoalFunction goal, size_t dimension): base(goal), mutation_dist(0, dimension-1)
 	{}
-
-	using typename base::individual_type;
-	using typename base::individuals_references;
-	using base::population;
-	using base::goalFunction;
-
-	virtual std::vector<Individual> crossOver(individuals_references const & parents)
-	{
-		std::vector<Individual> population_;
-		for(auto itr = std::begin(parents); itr != std::end(parents); ++itr)
-		{
-			auto next_itr = std::next(itr);
-			if (next_itr == std::end(parents))
-				next_itr = std::begin(parents);
-			population_.push_back(crossOver(*itr, *next_itr));
-		}
-		return population_;
-	}
 
 	Individual crossOver(Individual const& lhs, Individual const& rhs)
 	{
@@ -43,14 +27,6 @@ public :
 			return lhs | rhs;
 	}
 
-	virtual std::vector<Individual> mutate(individuals_references const & mutants)
-	{
-		std::vector<Individual> population_;
-		for (auto m : mutants)
-			population_.push_back(mutate(m));
-		return population_;
-	}
-
 	Individual mutate(Individual m)
 	{
 		auto pos = mutation_dist(gen);
@@ -58,16 +34,17 @@ public :
 		return m;
 	}
 
+	virtual bool goalReached()
+	{
+		return counter++ > 100;
+	}
+
 	void print()
 	{
+		auto& population = this->getPopulation();
 		for (auto individual : population)
 			std::cout << individual << " ";
 		std::cout << std::endl;
-	}
-
-	virtual bool goalReached()
-	{
-		return counter++ > 10;
 	}
 
 	void printBest() const
@@ -80,6 +57,7 @@ public :
 		std::cout<< " --best :"<< best << std::endl;
 	}
 
+private:
 	size_t counter = 0;
 	std::bernoulli_distribution dist;
 	Darwin::Rand::uniform_distribution<size_t> mutation_dist;
@@ -87,14 +65,15 @@ public :
 };
 
 template<class GoalFunction>
-testEvolutionaryConfig<GoalFunction> make_testEvolutionaryConfig(GoalFunction goal, size_t size, size_t dimension)
+testEvolutionaryConfig<GoalFunction> make_testEvolutionaryConfig(GoalFunction goal, size_t dimension)
 {
-	return testEvolutionaryConfig<GoalFunction>(goal, size, dimension);
+	return testEvolutionaryConfig<GoalFunction>(goal, dimension);
 }
 
 
 int main()
 {
+	using namespace Darwin;
 	auto goalFunction = [](std::vector<bool> const& individual)
 	{
 		float s = 0;
@@ -104,8 +83,21 @@ int main()
 		}
 		return s;
 	};
-	auto config = make_testEvolutionaryConfig(goalFunction, 100, 10'000);
-	Darwin::GeneticAlgorithmLoop(config);
+
+	int population_size = 100;
+	size_t dimension = 1000;
+	double alpha_mutate = 0.4;
+	double alpha_crossOver = 0.6;
+	double alpha_removal =(alpha_mutate+alpha_crossOver)/(1+alpha_mutate+alpha_crossOver);
+	auto config = make_testEvolutionaryConfig(goalFunction, dimension);
+
+	// settings
+	config.setInitializer(make_initialization<UniformInitialization<Individual>>(population_size, dimension));
+	config.setSelectionForCrossOver(make_selection<UniformSelection<Individual>>(alpha_crossOver, population_size));
+	config.setSelectionForMutation(make_selection<UniformSelection<Individual>>(alpha_mutate, population_size));
+	config.setSelectionForRemoval(make_selection<ThresholdSelection<Individual>>(alpha_removal));
+
+	GeneticAlgorithmLoop(config);
 	config.printBest();
 
     return 0;

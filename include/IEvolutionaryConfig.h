@@ -1,10 +1,12 @@
 #pragma once
 #include <list> // std::list
 #include <vector>
+#include <cstddef>
 #include <functional> // std::reference_wrapper
 #include <string>
 #include <algorithm>
 #include "Selection/ISelection.h"
+#include "Initialization/IInitialization.h"
 #include "datastructures/algorithms.h"
 
 namespace Darwin
@@ -27,39 +29,48 @@ namespace Darwin
 			using individual_type = Individual;
 			using population_type = Population;
 			using indices = std::vector<std::size_t>;
+			using selection_type = SelectionType<population_type,indices>;
+			using initialization_type = InitializationType<population_type>;
 
 			IStandardEvolutionaryConfig(GoalFunction _goalFunction,
-										SelectionType _selectForCrossOver = nullptr,
-										SelectionType _selectForMutation = nullptr,
-										SelectionType _selectForRemoval = nullptr) :
+										initialization_type&& _initializePopulation = nullptr,
+										selection_type&& _selectForCrossOver = nullptr,
+										selection_type&& _selectForMutation = nullptr,
+										selection_type&& _selectForRemoval = nullptr) :
 				goalFunction(_goalFunction),
-				selectForCrossOver(_selectForCrossOver),
-				selectForMutation(_selectForMutation),
-				selectForRemoval(_selectForRemoval)
+				initializePopulation(std::move(_initializePopulation)),
+				selectForCrossOver(std::move(_selectForCrossOver)),
+				selectForMutation(std::move(_selectForMutation)),
+				selectForRemoval(std::move(_selectForRemoval))
 			{}
 
 			// setters
 
-			void setSelectionForCrossOver(SelectionType _selectForCrossOver)
+			void setInitializer(initialization_type&& _initializePopulation)
 			{
-				selectForCrossOver = _selectForCrossOver;
+				initializePopulation = std::move(_initializePopulation);
 			}
 
-			void setSelectionForMutation(SelectionType _selectForMutation)
+			void setSelectionForCrossOver(selection_type&& _selectForCrossOver)
 			{
-				selectForMutation = _selectForMutation;
+				selectForCrossOver = std::move(_selectForCrossOver);
 			}
 
-			void setSelectionForRemoval(SelectionType _selectForRemoval)
+			void setSelectionForMutation(selection_type&& _selectForMutation)
 			{
-				selectForRemoval = _selectForRemoval;
+				selectForMutation = std::move(_selectForMutation);
+			}
+
+			void setSelectionForRemoval(selection_type&& _selectForRemoval)
+			{
+				selectForRemoval =std::move(_selectForRemoval);
 			}
 
 			// Genetic Algorithms
 
 			virtual IEvolutionaryConfig& init()
 			{
-				initializePopulation(population);
+				(*initializePopulation)(population);
 				return *this;
 			}
 
@@ -82,11 +93,30 @@ namespace Darwin
 				return *this;
 			}
 
-			virtual void initializePopulation(population_type&, std::string method = "uniform") = 0;
+			virtual population_type crossOver(population_type& population, indices const & parents)
+			{
+				std::vector<Individual> population_;
+				for(auto itr = std::begin(parents); itr != std::end(parents); ++itr)
+				{
+					auto next_itr = std::next(itr);
+					if (next_itr == std::end(parents))
+						next_itr = std::begin(parents);
+					population_.push_back(crossOver(population.at(*itr), population.at(*next_itr)));
+				}
+				return population_;
+			}
 
-			virtual population_type crossOver(population_type population, indices const&) = 0;
+			virtual population_type mutate(population_type& population, indices const & mutants)
+			{
+				Population population_;
+				for (auto m : mutants)
+					population_.push_back(mutate(population.at(m)));
+				return population_;
+			}
 
-			virtual population_type mutate(population_type population, indices const&) = 0;
+			virtual individual_type crossOver(individual_type const& lhs, individual_type const& rhs) = 0;
+
+			virtual individual_type mutate(individual_type m) = 0;
 
 			// Getters
 
@@ -113,11 +143,10 @@ namespace Darwin
 		protected:
 			population_type population;
 			GoalFunction goalFunction;
-			SelectionType selectForCrossOver;
-			SelectionType selectForMutation;
-			SelectionType selectForRemoval;
+			initialization_type initializePopulation;
+			selection_type selectForCrossOver;
+			selection_type selectForMutation;
+			selection_type selectForRemoval;
 		};
-        
-
 	}
 }

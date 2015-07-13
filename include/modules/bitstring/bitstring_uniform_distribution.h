@@ -46,7 +46,7 @@ namespace Darwin
 				ret.reserve(size);
 				for(size_t position = 0; position < size; ++position)
 				{
-					ret.push_back(dists[position](gen));
+					ret.push_back(dists.at(position)(gen));
 				}
 				return ret;
 			}

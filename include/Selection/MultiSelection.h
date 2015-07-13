@@ -62,12 +62,6 @@ namespace Darwin
 	};
 
 	template<class Option, class... Args>
-	std::unique_ptr<Option> make_selection(Args&&... args)
-	{
-		return std::make_unique<Option>(std::forward<Args>(args)...);
-	}
-
-	template<class Option, class... Args>
 	std::pair<std::string, std::unique_ptr<Option>> make_selection_pair(std::string name, Args&&... args)
 	{
 		return std::make_pair(name, make_selection<Option>(std::forward<Args>(args)...));

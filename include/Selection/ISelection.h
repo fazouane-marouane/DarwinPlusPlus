@@ -16,9 +16,15 @@ namespace Darwin
 		};
 
 		template<class Population, class Indices>
-		inline ISelection::~ISelection(){}
+		inline ISelection<Population, Indices>::~ISelection(){}
 
 		template<class Population, class Indices>
 		using SelectionType= std::unique_ptr<ISelection<Population, Indices>>;
+	}
+
+	template<class Option, class... Args>
+	std::unique_ptr<Option> make_selection(Args&&... args)
+	{
+		return std::make_unique<Option>(std::forward<Args>(args)...);
 	}
 }
