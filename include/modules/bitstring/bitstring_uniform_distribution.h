@@ -54,5 +54,6 @@ namespace Darwin
 			std::vector<std::bernoulli_distribution> dists;
 			size_t const size;
 		};
+
 	}
 }

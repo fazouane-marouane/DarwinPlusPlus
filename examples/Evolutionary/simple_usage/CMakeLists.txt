@@ -1,4 +1,5 @@
 include_directories (${DarwinPP_SOURCE_DIR}/include)
+include_directories (/usr/local/opt/eigen/include)
 
 file(GLOB_RECURSE Darwin_INC
     "${DarwinPP_SOURCE_DIR}/include/*.h"
