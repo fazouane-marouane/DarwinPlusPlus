@@ -84,7 +84,7 @@ int main()
 		return s;
 	};
 
-	int population_size = 100;
+	size_t population_size = 100;
 	size_t dimension = 1000;
 	double alpha_mutate = 0.4;
 	double alpha_crossOver = 0.6;

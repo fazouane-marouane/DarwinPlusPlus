@@ -104,14 +104,15 @@ int main()
 	};
 	// Problem solving
 
-	int population_size = 100;
+	size_t population_size = 100;
+	size_t dimension = nbCities;
 	double alpha_mutate = 0.3;
 	double alpha_crossOver = 0.3;
 	double alpha_removal =(alpha_mutate+alpha_crossOver)/(1+alpha_mutate+alpha_crossOver);
-	auto config = make_testEvolutionaryConfig(goalFunction, nbCities);
+	auto config = make_testEvolutionaryConfig(goalFunction, dimension);
 
 	// settings
-	config.setInitializer(make_initialization<UniformInitialization<Individual>>(population_size, nbCities));
+	config.setInitializer(make_initialization<UniformInitialization<Individual>>(population_size, dimension));
 	config.setSelectionForCrossOver(make_selection<UniformSelection<Individual>>(alpha_crossOver, population_size));
 	config.setSelectionForMutation(make_selection<UniformSelection<Individual>>(alpha_mutate, population_size));
 	config.setSelectionForRemoval(make_selection<ThresholdSelection<Individual>>(alpha_removal));

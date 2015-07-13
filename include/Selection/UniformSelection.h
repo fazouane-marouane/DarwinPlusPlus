@@ -29,7 +29,7 @@ namespace Darwin
 			return indices;
 		}
 	private:
-		size_t const threshold_ratio;
+		double const threshold_ratio;
 		Rand::uniform_distribution<size_t> dist;
 		std::mt19937 gen = std::mt19937(std::random_device()());
 	};
