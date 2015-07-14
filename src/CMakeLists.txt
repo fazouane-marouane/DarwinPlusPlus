@@ -1,4 +1,6 @@
-include_directories (${DarwinPP_SOURCE_DIR}/include)
+find_package (Boost)
+include_directories (${DarwinPP_SOURCE_DIR}/include
+${Boost_INCLUDE_DIRS})
 
 file(GLOB_RECURSE Darwin_INC
     "${DarwinPP_SOURCE_DIR}/include/*.h"

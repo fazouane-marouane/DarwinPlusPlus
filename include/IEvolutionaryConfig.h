@@ -5,6 +5,8 @@
 #include <functional> // std::reference_wrapper
 #include <string>
 #include <algorithm>
+#include <thread>
+#include <omp.h>
 #include "Selection/ISelection.h"
 #include "Initialization/IInitialization.h"
 #include "datastructures/algorithms.h"
@@ -77,12 +79,19 @@ namespace Darwin
 			virtual IEvolutionaryConfig& breed()
 			{
 				// Cross Over
-				auto newIndividuals = crossOver(population, (*selectForCrossOver)(population));
+				population_type newIndividuals;// = crossOver(population, (*selectForCrossOver)(population));
 				// Mutation
-				auto mutants = mutate(population, (*selectForMutation)(population));
+				population_type mutants;// = mutate(population, (*selectForMutation)(population));
+				std::thread runner1([&newIndividuals, this](){ newIndividuals = crossOver(population, (*selectForCrossOver)(population)); });
+				std::thread runner2([&mutants, this]() { mutants = mutate(population, (*selectForMutation)(population)); });
+				runner1.join();
+				runner2.join();
 				// Merge these new individuals into the original population
 				Darwin::utility::merge(population, newIndividuals, mutants);
 				// sort
+				#pragma omp parallel for
+				for (auto itr = population.begin(); itr < population.end(); ++itr)
+					(void)goalFunction(*itr);
 				std::sort(population.begin(), population.end(),
 					[this](Individual& lhs, Individual& rhs)
 					{
@@ -96,6 +105,7 @@ namespace Darwin
 			virtual population_type crossOver(population_type& population, indices const & parents)
 			{
 				std::vector<Individual> population_;
+				#pragma omp parallel for
 				for(auto itr = std::begin(parents); itr != std::end(parents); ++itr)
 				{
 					auto next_itr = std::next(itr);
@@ -109,8 +119,9 @@ namespace Darwin
 			virtual population_type mutate(population_type& population, indices const & mutants)
 			{
 				Population population_;
-				for (auto m : mutants)
-					population_.push_back(mutate(population.at(m)));
+				#pragma omp parallel for
+				for (auto itr = mutants.begin(); itr < mutants.end(); ++itr)
+					population_.push_back(mutate(population.at(*itr)));
 				return population_;
 			}
 

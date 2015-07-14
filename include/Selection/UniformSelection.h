@@ -6,6 +6,8 @@
 #include "ISelection.h"
 #include "../Random/Random.h"
 
+#include <set>
+
 namespace Darwin
 {
 	template<class Individual, class Population = std::vector<Individual>, class Indices= std::vector<size_t>>
@@ -16,16 +18,19 @@ namespace Darwin
 
 		Indices operator()(Population& population)
 		{
-			size_t threshold = static_cast<size_t>(threshold_ratio*population.size());
+			size_t threshold = std::min(static_cast<size_t>(threshold_ratio*population.size()), population.size());
 			auto rand = [&]() { return dist(gen); };
-			std::vector<size_t> indices;
+			//std::vector<size_t> indices;
+			std::set<size_t, std::greater<size_t>> tmp;
 
-			while ( indices.size() < threshold )
+			#pragma omp parallel for
+			for (; tmp.size() < threshold; )
 			{
-				indices.push_back(rand());
-				sort( std::begin(indices), std::end(indices) );
-				indices.erase( unique( std::begin(indices), std::end(indices) ), std::end(indices) );
+				tmp.insert(rand());
+				/*sort( std::begin(indices), std::end(indices) );
+				indices.erase( unique( std::begin(indices), std::end(indices) ), std::end(indices) );*/
 			}
+			std::vector<size_t> indices(tmp.begin(), tmp.end());
 			return indices;
 		}
 	private:

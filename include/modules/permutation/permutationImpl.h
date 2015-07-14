@@ -12,7 +12,10 @@ namespace Darwin
 		std::vector<size_t> const& get() const;
 		std::vector<size_t>& get();
 
+		void invert();
+		void reverse();
 		void transpose(size_t first, size_t second);
+		void reverseAllBetween(size_t first, size_t last);
 		void compose(Permutation const& other);
 
 	private:

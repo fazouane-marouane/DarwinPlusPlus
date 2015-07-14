@@ -26,14 +26,20 @@ namespace Darwin
 			template<class Generator>
 			Permutation operator()(Generator& gen)
 			{
-				std::vector<size_t> result;
-				result.reserve(size);
-				auto permutation = simple_permutation;
-				for(size_t position = 0; position < size; ++position)
+				std::vector<size_t> result(size);
+				std::vector<size_t> permutation = simple_permutation;
+				std::vector<size_t> positions(size);
+
+				#pragma omp parallel for
+				for (size_t itr = 0; itr < size; ++itr)
 				{
-					auto pos = dists[position](gen);
-					auto itr = permutation.begin() + pos;
-					result.push_back(*itr);
+					positions[itr] = dists[itr](gen);
+				}
+
+				for (size_t pos = 0; pos < size; ++pos)
+				{
+					auto itr = permutation.begin() + positions[pos];
+					result[pos] =*itr;
 					permutation.erase(itr);
 				}
 				return Permutation(result);
