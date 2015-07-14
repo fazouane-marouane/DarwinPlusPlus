@@ -9,6 +9,7 @@
 #include <Initialization/RandomInitialization.h>
 #include <Selection/ThresholdSelection.h>
 #include <Selection/UniformSelection.h>
+#include <Selection/MixedSelection.h>
 
 using namespace Eigen;
 using Individual = Darwin::Permutation;
@@ -71,10 +72,10 @@ testEvolutionaryConfig<GoalFunction> make_testEvolutionaryConfig(GoalFunction&& 
 }
 
 
-Vector2f getCoordonnate(int i){
+Vector2f getCoordonnate(int i, int nbCities){
     Vector2f city;
-    city(0) = i%3;
-    city(1) = i/3;
+    city(0) = i % int(std::sqrt(nbCities));
+    city(1) = i/int(std::sqrt(nbCities));
     return city;
 }
 
@@ -82,12 +83,12 @@ int main()
 {
 	using namespace Darwin;
 	// Data
-	int nbCities = 9;
+	int nbCities = 100;
     MatrixXf cityMap(nbCities, nbCities);
 	for (int i = 0; i < nbCities; i++)
 		for (int j = 0; j < nbCities; j++){
-        	Vector2f city_i = getCoordonnate(i);
-            Vector2f city_j = getCoordonnate(j);
+        	Vector2f city_i = getCoordonnate(i, nbCities);
+            Vector2f city_j = getCoordonnate(j, nbCities);
 			cityMap(i,j)= std::sqrt(std::pow(city_i(0)-city_j(0),2)+ std::pow(city_i(1)-city_j(1),2));			
 		}
 
@@ -104,10 +105,11 @@ int main()
 	};
 	// Problem solving
 
-	size_t population_size = 100;
+	size_t population_size = 10000;
 	size_t dimension = nbCities;
-	double alpha_mutate = 0.3;
-	double alpha_crossOver = 0.3;
+	double alpha_mutate = 0.8;
+	double alpha_crossOver = 0.8;
+	double score_proportion_removal = 0.5;
 	double alpha_removal =(alpha_mutate+alpha_crossOver)/(1+alpha_mutate+alpha_crossOver);
 	auto config = make_testEvolutionaryConfig(goalFunction, dimension);
 
@@ -115,7 +117,8 @@ int main()
 	config.setInitializer(make_initialization<UniformInitialization<Individual>>(population_size, dimension));
 	config.setSelectionForCrossOver(make_selection<UniformSelection<Individual>>(alpha_crossOver, population_size));
 	config.setSelectionForMutation(make_selection<UniformSelection<Individual>>(alpha_mutate, population_size));
-	config.setSelectionForRemoval(make_selection<ThresholdSelection<Individual>>(alpha_removal));
+	//config.setSelectionForRemoval(make_selection<ThresholdSelection<Individual>>(alpha_removal));
+	config.setSelectionForRemoval(make_selection<MixedSelection<Individual>>(alpha_removal, score_proportion_removal));
 
 	// run
 	Darwin::GeneticAlgorithmLoop(config);
