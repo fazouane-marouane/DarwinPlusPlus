@@ -109,7 +109,7 @@ int main()
 	size_t dimension = nbCities;
 	double alpha_mutate = 0.8;
 	double alpha_crossOver = 0.8;
-	double score_proportion_removal = 0.5;
+	double score_proportion_removal = 0.4;
 	double alpha_removal =(alpha_mutate+alpha_crossOver)/(1+alpha_mutate+alpha_crossOver);
 	auto config = make_testEvolutionaryConfig(goalFunction, dimension);
 
