@@ -17,6 +17,7 @@ namespace Darwin
 
 		std::size_t operator()(Population& population)
 		{
+			population.reserve(target_population_size);
 			#pragma omp parallel for
 			while ( population.size() <= target_population_size )
 				population.push_back(dist(gen));

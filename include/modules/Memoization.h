@@ -8,7 +8,7 @@ namespace Darwin
 	{
 	public:
 		template<class WrappedType2 = WrappedType>
-		Memoized(WrappedType2 m) : wrapped_value(m)
+		Memoized(WrappedType2 const& m) : wrapped_value(m)
 		{}
 
 		template<class WrappedType2 = WrappedType, class MemoizedValueType2 = MemoizedValueType>
@@ -58,7 +58,7 @@ namespace Darwin
 	template<class Function>
 	inline auto liftMemoized(Function f)
 	{
-		return [f](auto m)
+		return [f](auto& m)
 		{
 			if(! m.hasMemoizedValue())
 				m.setMemoizedValue(f(m.get()));

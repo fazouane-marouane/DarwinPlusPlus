@@ -144,7 +144,7 @@ void testCase(int nbCities, size_t population_size, double alpha_mutate, double 
 	{
 		double s = 0;
 		#pragma omp parallel for
-		for (int i = 0; i < individual.get().size()-1; i++)
+		for (size_t i = 0; i < individual.get().size()-1; i++)
 		{
 			s -= cityMap(individual.get().at(i), individual.get().at(i+1));
 		}
@@ -158,8 +158,8 @@ void testCase(int nbCities, size_t population_size, double alpha_mutate, double 
 
 	// settings
 	config.setInitializer(make_initialization<UniformInitialization<Individual>>(population_size, dimension));
-	config.setSelectionForCrossOver(make_selection<UniformSelection<Individual>>(alpha_crossOver, population_size));
-	config.setSelectionForMutation(make_selection<UniformSelection<Individual>>(alpha_mutate, population_size));
+	config.setSelectionForCrossOver(make_selection<UniformSelection<Individual>>(alpha_crossOver));
+	config.setSelectionForMutation(make_selection<UniformSelection<Individual>>(alpha_mutate));
 	config.setSelectionForRemoval(make_selection<ThresholdSelection<Individual>>(alpha_removal));
 
 	// run
@@ -176,7 +176,7 @@ void testCase(int nbCities, size_t population_size, double alpha_mutate, double 
 
 int main()
 {
-	std::thread runners[] = { std::thread(testCase, 100, 1000, 0.999, 0.999),
+	std::thread runners[] = { std::thread(testCase, 100, 1000, 1.0, 1.0),
 		std::thread(testCase, 9, 100, 0.4, 0.6) };
 
 	for (auto& r: runners)
