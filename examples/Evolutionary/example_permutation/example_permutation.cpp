@@ -12,6 +12,7 @@
 #include <modules/Memoization.h>
 #include <chrono>
 #include <omp.h>
+#include <sstream>
 
 namespace Darwin
 {
@@ -71,35 +72,35 @@ public :
 
 	virtual bool goalReached()
 	{
-		return counter++ > 50;
+		return counter++ > 100;
 	}
     
-	void print()
+	void print(std::ostream& os)
 	{
 		auto& population = this->getPopulation();
 		for (auto individual : population)
-			std::cout << individual.get() << " ";
-		std::cout << std::endl;
+			os << individual.get() << " ";
+		os << std::endl;
 	}
 
-	void printBest(size_t nbcities) const
+	void printBest(size_t nbcities, std::ostream& os) const
 	{
 		auto& goalFunction = this->getGoalFunction();
 		auto& population = this->getPopulation();
 		auto best = *std::max_element(std::begin(population), std::end(population), [&goalFunction](auto lhs, auto rhs)
 		{ return goalFunction(lhs) < goalFunction(rhs); });
-		std::cout << "count: " << counter << " -- best score: " << goalFunction(best) << std::endl;
-		std::cout << " --best :"<<std::endl;// << best << std::endl;
+		os << "count: " << counter << " -- best score: " << goalFunction(best) << std::endl;
+		os << " --best :"<<std::endl;// << best << std::endl;
 		
-		std::cout << "{";
+		os << "{";
 		for(auto c: best.get().get())
 		{
 			auto coordinates= getCoordonnate(c, nbcities);
-			std::cout << "{" << coordinates(0) << ", " << coordinates(1) << "}, ";
+			os << "{" << coordinates(0) << ", " << coordinates(1) << "}, ";
 		}
 		auto coordinates = getCoordonnate(best.get().get()[0], nbcities);
-		std::cout << "{" << coordinates(0) << ", " << coordinates(1) << "}";
-		std::cout << "}" << std::endl;
+		os << "{" << coordinates(0) << ", " << coordinates(1) << "}";
+		os << "}" << std::endl;
 	}
 
 private:
@@ -124,11 +125,11 @@ double distance2D(size_t lhs, size_t rhs, size_t nbCities)
 	return distance2D(getCoordonnate(lhs,nbCities), getCoordonnate(rhs, nbCities));
 }
 
-int main()
+void testCase(int nbCities, size_t population_size, double alpha_mutate, double alpha_crossOver)
 {
+	std::ostringstream strBuffer;
 	using namespace Darwin;
 	// Data
-	int nbCities =  100*100;
     MatrixXd cityMap(nbCities, nbCities);
 	for (int i = 0; i < nbCities; i++)
 		for (int j = 0; j < nbCities; j++){
@@ -137,7 +138,7 @@ int main()
 			cityMap(i, j) = distance2D(city_i, city_j);
 		}
 
-	//std::cout << cityMap << std::endl;
+	//strBuffer << cityMap << std::endl;
 
 	auto goalFunction = [&cityMap, &nbCities](Darwin::Permutation const& individual)
 	{
@@ -150,11 +151,8 @@ int main()
 		return s;
 	};
 	// Problem solving
-
-	size_t population_size = 100;
 	size_t dimension = nbCities;
-	double alpha_mutate = 0.999;
-	double alpha_crossOver = 0.999;
+
 	double alpha_removal =(alpha_mutate+alpha_crossOver)/(1+alpha_mutate+alpha_crossOver);
 	auto config = make_testEvolutionaryConfig(liftMemoized(goalFunction), dimension);
 
@@ -169,8 +167,18 @@ int main()
 	Darwin::GeneticAlgorithmLoop(config);
 	auto end = std::chrono::steady_clock::now();
     //config.print();
-	config.printBest(nbCities);
+	config.printBest(nbCities, strBuffer);
 	auto diff = end - start;
-	std::cout << "total time: " << std::chrono::duration<double, std::micro>(diff).count() <<"µs"<<std::endl;
-    return 0;
+	strBuffer << "total time: " << std::chrono::duration<double, std::micro>(diff).count() <<"µs"<<std::endl;
+	std::cout << strBuffer.str();
+}
+
+
+int main()
+{
+	std::thread runners[] = { std::thread(testCase, 100, 1000, 0.999, 0.999),
+		std::thread(testCase, 9, 100, 0.4, 0.6) };
+
+	for (auto& r: runners)
+		r.join();
 }
