@@ -11,15 +11,15 @@ git:
     submodules: false
 
 before_script:
-  - if [ "$TRAVIS_OS_NAME"=="linux" ] && [ "$CXX" == "g++" ]; then export CXX_COMPILER=$(which g++-${GCC_VERSION}); fi
-  - if [ "$TRAVIS_OS_NAME"=="linux" ] && [ "$CXX" == "g++" ]; then export C_COMPILER=$(which gcc-${GCC_VERSION}); fi
-  - if [ "$TRAVIS_OS_NAME"=="linux" ] && [ "$CXX" != "g++" ]; then export CXX_COMPILER=$(which clang++-${CLANG_VERSION}); fi
-  - if [ "$TRAVIS_OS_NAME"=="linux" ] && [ "$CXX" != "g++" ]; then export C_COMPILER=$(which clang-${CLANG_VERSION}); fi
+  - if [ "$TRAVIS_OS_NAME"=="linux" ] && [ "$CXX" == "g++" ]; then CXX_COMPILER=g++-${GCC_VERSION}; fi
+  - if [ "$TRAVIS_OS_NAME"=="linux" ] && [ "$CXX" == "g++" ]; then C_COMPILER=gcc-${GCC_VERSION}; fi
+  - if [ "$TRAVIS_OS_NAME"=="linux" ] && [ "$CXX" != "g++" ]; then CXX_COMPILER=clang++-${CLANG_VERSION}; fi
+  - if [ "$TRAVIS_OS_NAME"=="linux" ] && [ "$CXX" != "g++" ]; then C_COMPILER=clang-${CLANG_VERSION}; fi
   - mkdir build
   - cd build
   - cmake --version
-  - $CXX_COMPILER --version
-  - $C_COMPILER --version
+  - ${CXX_COMPILER} --version
+  - ${C_COMPILER} --version
   - cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_COMPILER=${CXX_COMPILER} -DCMAKE_C_COMPILER=${C_COMPILER} ..
 
 script: make && ctest
