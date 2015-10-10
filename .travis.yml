@@ -42,6 +42,7 @@ addons:
     packages:
     - cmake
     - clang-3.7
+    - libc++1
     - g++-5
     - libboost1.55-all-dev
     - libeigen3-dev
