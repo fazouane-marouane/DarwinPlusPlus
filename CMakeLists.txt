@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 include(CheckCXXCompilerFlag)
-project(DarwinPP CXX)
+project(DarwinPP C CXX)
 
 # Special output directories
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
