@@ -53,7 +53,7 @@ namespace Darwin
 				assert(std::abs(cumsum - 1.0) < std::numeric_limits<_Double>::epsilon());
 			}
 
-			void init_with_positive_values(std::vector<_Double> vect_sums)
+			void init_with_positive_values(std::vector<_Double> vect)
 			{
 				_Double sum = 0;
 				for (auto v : vect)
@@ -112,7 +112,7 @@ namespace Darwin
 		template<class _Double>
 		discrete_distribution<_Double> make_distribution_from_positive_values(std::initializer_list<_Double> values)
 		{
-			return discrete_distribution<_Double>(probabilities, positive_values_t{});
+			return discrete_distribution<_Double>(values, positive_values_t{});
 		}
 
 		template<class _Double>

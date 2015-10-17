@@ -15,11 +15,3 @@ target_link_libraries (Test
                        Darwin
                        ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
                        )
-
-
-SET(APPS  "${CMAKE_INSTALL_PREFIX}/bin/*/Test")  # paths to executables
-set(DIRS  "${Boost_LIBRARY_DIRS}")   # directories to search for prerequisites
-INSTALL(CODE "
-   include(BundleUtilities)
-   fixup_bundle(\"${APPS}\"   \"\"   \"${DIRS}\")
-   " COMPONENT Runtime)
