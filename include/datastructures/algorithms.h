@@ -36,7 +36,7 @@ namespace Darwin
 			const size_t N = dest.size();
 			#pragma omp parallel
 			{
-				std::vector<Individual> tmp_private;
+				VectDest tmp_private;
 				#pragma omp for
 				for (int i = 0; i < N; i++)
 				{
