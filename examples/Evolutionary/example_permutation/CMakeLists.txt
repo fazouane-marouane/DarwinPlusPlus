@@ -14,9 +14,11 @@ file(GLOB_RECURSE Example_Evolutionary_Permutation_SRC
     "*.cpp"
 )
 
+add_definitions (-DDARWIN_INLINE)
+
 add_executable (example_Evolutionary_permutation ${Darwin_INC} ${Example_Evolutionary_Permutation_SRC})
 
-target_compile_definitions(example_Evolutionary_permutation PRIVATE DARWIN_INLINE=1)
+#target_compile_definitions(example_Evolutionary_permutation PRIVATE DARWIN_INLINE=1)
 
 target_link_libraries(example_Evolutionary_permutation 
                        Darwin)
