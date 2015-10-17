@@ -26,7 +26,7 @@ namespace Darwin
 		}
 
 		template<class VectDest, class Indx>
-		void remove(VectDest& dest, Indx toBeRemoved)
+		inline void remove(VectDest& dest, Indx&& toBeRemoved)
 		{
 			// check that toBeRemoved is sorted
 			for(auto v: toBeRemoved)

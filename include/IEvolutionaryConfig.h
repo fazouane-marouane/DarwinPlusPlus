@@ -8,6 +8,7 @@
 #include <map>
 #include <thread>
 #include <chrono>
+#include <omp.h>
 #include "Selection/ISelection.h"
 #include "Initialization/IInitialization.h"
 #include "datastructures/algorithms.h"
@@ -94,6 +95,9 @@ namespace Darwin
 				Darwin::utility::merge(population, std::move(newIndividuals), std::move(mutants));
 				auto endMerge = std::chrono::steady_clock::now();
 				// sort
+				#pragma omp parallel for
+				for (auto itr = population.begin(); itr < population.end(); ++itr)
+					(void)goalFunction(*itr);
 				std::sort(population.begin(), population.end(),
 					[this](Individual& lhs, Individual& rhs)
 					{
@@ -113,6 +117,7 @@ namespace Darwin
 			virtual population_type crossOver(population_type& population, indices const & parents)
 			{
 				std::vector<Individual> population_;
+				#pragma omp parallel for
 				for(auto itr = std::begin(parents); itr != std::end(parents); ++itr)
 				{
 					auto next_itr = std::next(itr);
@@ -126,8 +131,9 @@ namespace Darwin
 			virtual population_type mutate(population_type& population, indices const & mutants)
 			{
 				Population population_;
-				for (auto m : mutants)
-					population_.push_back(mutate(population.at(m)));
+				#pragma omp parallel for
+				for (auto itr = mutants.begin(); itr < mutants.end(); ++itr)
+					population_.push_back(mutate(population.at(*itr)));
 				return population_;
 			}
 

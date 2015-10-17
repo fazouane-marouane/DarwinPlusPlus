@@ -93,8 +93,8 @@ int main()
 
 	// settings
 	config.setInitializer(make_initialization<UniformInitialization<Individual>>(population_size, dimension));
-	config.setSelectionForCrossOver(make_selection<UniformSelection<Individual>>(alpha_crossOver, population_size));
-	config.setSelectionForMutation(make_selection<UniformSelection<Individual>>(alpha_mutate, population_size));
+	config.setSelectionForCrossOver(make_selection<UniformSelection<Individual>>(alpha_crossOver));
+	config.setSelectionForMutation(make_selection<UniformSelection<Individual>>(alpha_mutate));
 	config.setSelectionForRemoval(make_selection<ThresholdSelection<Individual>>(alpha_removal));
 
 	GeneticAlgorithmLoop(config);
