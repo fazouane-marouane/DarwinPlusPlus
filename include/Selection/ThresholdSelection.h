@@ -16,7 +16,7 @@ namespace Darwin
 			size_t index = static_cast<size_t>(threshold_ratio*population.size());
 			Indices indices(index);
 			
-			std::generate(std::begin(indices), std::end(indices), [&index]() { return --index;});
+			std::generate(std::begin(indices), std::end(indices), [i = index]() mutable { return --i;});
 			return indices;
 		}
 	private:

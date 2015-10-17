@@ -5,6 +5,9 @@
 #include <functional> // std::reference_wrapper
 #include <string>
 #include <algorithm>
+#include <map>
+#include <thread>
+#include <chrono>
 #include "Selection/ISelection.h"
 #include "Initialization/IInitialization.h"
 #include "datastructures/algorithms.h"
@@ -76,20 +79,34 @@ namespace Darwin
 
 			virtual IEvolutionaryConfig& breed()
 			{
+				auto startCompute = std::chrono::steady_clock::now();
 				// Cross Over
-				auto newIndividuals = crossOver(population, (*selectForCrossOver)(population));
+				population_type newIndividuals;
 				// Mutation
-				auto mutants = mutate(population, (*selectForMutation)(population));
+				population_type mutants;
+				std::vector<std::thread> tasks;
+				tasks.push_back(std::thread([this, &newIndividuals]() { newIndividuals = crossOver(population, (*selectForCrossOver)(population)); }));
+				tasks.push_back(std::thread([this, &mutants]() { mutants = mutate(population, (*selectForMutation)(population)); }));
+				for (auto& t : tasks)
+					t.join();
+				auto endCompute = std::chrono::steady_clock::now();
 				// Merge these new individuals into the original population
-				Darwin::utility::merge(population, newIndividuals, mutants);
+				Darwin::utility::merge(population, std::move(newIndividuals), std::move(mutants));
+				auto endMerge = std::chrono::steady_clock::now();
 				// sort
 				std::sort(population.begin(), population.end(),
 					[this](Individual& lhs, Individual& rhs)
 					{
 						return goalFunction(lhs) < goalFunction(rhs);
 					});
+				auto endSort = std::chrono::steady_clock::now();
 				// Natural selection
 				Darwin::utility::remove(population, (*selectForRemoval)(population));
+				auto endBreed = std::chrono::steady_clock::now();
+				perfs["Compute"] += endCompute - startCompute;
+				perfs["Merge"] += endMerge - endCompute;
+				perfs["Sort"] += endSort - endMerge;
+				perfs["Remove"] += endBreed - endSort;
 				return *this;
 			}
 
@@ -140,6 +157,11 @@ namespace Darwin
 				return goalFunction;
 			}
 
+			virtual std::map<std::string, std::chrono::duration<double, std::nano>> const& getPerfs() const
+			{
+				return perfs;
+			}
+
 		protected:
 			population_type population;
 			GoalFunction goalFunction;
@@ -147,6 +169,8 @@ namespace Darwin
 			selection_type selectForCrossOver;
 			selection_type selectForMutation;
 			selection_type selectForRemoval;
+
+			std::map<std::string, std::chrono::duration<double, std::nano>> perfs;
 		};
 	}
 }

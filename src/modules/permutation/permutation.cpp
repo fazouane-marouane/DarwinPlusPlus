@@ -1,4 +1,8 @@
-#include "modules/permutation/permutation.h"
+#pragma once
+#include <DarwinConfig.h>
+#ifndef DARWIN_INLINE
+#include <modules/permutation/permutation.h>
+#endif
 #include <algorithm>
 #include <iterator>
 #include <cassert>
@@ -11,13 +15,22 @@ namespace Darwin
 		std::generate(std::begin(_internal), std::end(_internal), [&n]{ return n++; });
 	}
 
-	Permutation::Permutation(std::vector<size_t> permutation): size(permutation.size()), _internal(permutation)
+	Permutation::Permutation(std::vector<size_t> const& permutation): size(permutation.size()), _internal(permutation)
 	{
 		assert(size > 0);
 		std::vector<size_t> test(size);
 		size_t n = 0U;
 		std::generate(std::begin(test), std::end(test), [&n] { return n++; });
 		assert(std::is_permutation(_internal.begin(), _internal.end(),test.begin(), test.end() ));
+	}
+
+	Permutation::Permutation(std::vector<size_t>&& permutation) : size(permutation.size()), _internal(permutation)
+	{
+		/*assert(size > 0);
+		std::vector<size_t> test(size);
+		size_t n = 0U;
+		std::generate(std::begin(test), std::end(test), [&n] { return n++; });
+		assert(std::is_permutation(_internal.begin(), _internal.end(), test.begin(), test.end()));*/
 	}
 
 	std::vector<size_t> const& Permutation::get() const
@@ -32,7 +45,7 @@ namespace Darwin
 
 	void Permutation::transpose(size_t first, size_t second)
 	{
-		assert(first < size && second < size);
+		/*assert(first < size && second < size);*/
 		using std::swap;
 		swap(_internal[first], _internal[second]);
 	}

@@ -14,11 +14,11 @@ namespace Darwin
 		class uniform_distribution<Permutation>
 		{
 		public:
-			uniform_distribution(size_t _size): size(_size), dists(_size), simple_permutation(_size)
+			uniform_distribution(size_t _size): size(_size), /*dists(_size),*/ simple_permutation(_size)
 			{
 				assert(size > 0);
-				for (size_t itr = 0; itr < size; ++itr)
-					dists[itr] = uniform_distribution<size_t>(0, size-1-itr);
+				/*for (size_t itr = 0; itr < size; ++itr)
+					dists[itr] = uniform_distribution<size_t>(0, size-1-itr);*/
 				size_t n = 0U;
 				std::generate(std::begin(simple_permutation), std::end(simple_permutation), [&n] { return n++; });
 			}
@@ -31,16 +31,17 @@ namespace Darwin
 				auto permutation = simple_permutation;
 				for(size_t position = 0; position < size; ++position)
 				{
-					auto pos = dists[position](gen);
+					auto pos = myDist(gen, decltype(myDist)::param_type(0, size - 1 - position));//dists[position](gen);
 					auto itr = permutation.begin() + pos;
 					result.push_back(*itr);
 					permutation.erase(itr);
 				}
-				return Permutation(result);
+				return Permutation(std::move(result));
 			}
 		private:
 			size_t const size;
-			std::vector<uniform_distribution<size_t>> dists;
+			//std::vector<uniform_distribution<size_t>> dists;
+			uniform_distribution<size_t> myDist;
 			std::vector<size_t> simple_permutation;
 		};
 	}

@@ -78,11 +78,13 @@ Vector2f getCoordonnate(int i){
     return city;
 }
 
+#include <chrono>
+
 int main()
 {
 	using namespace Darwin;
 	// Data
-	int nbCities = 9;
+	int nbCities = 20*20;
     MatrixXf cityMap(nbCities, nbCities);
 	for (int i = 0; i < nbCities; i++)
 		for (int j = 0; j < nbCities; j++){
@@ -91,7 +93,7 @@ int main()
 			cityMap(i,j)= std::sqrt(std::pow(city_i(0)-city_j(0),2)+ std::pow(city_i(1)-city_j(1),2));			
 		}
 
-	std::cout << cityMap << std::endl;
+	//std::cout << cityMap << std::endl;
 
 	auto goalFunction = [&cityMap](Individual const& individual)
 	{
@@ -104,10 +106,10 @@ int main()
 	};
 	// Problem solving
 
-	size_t population_size = 100;
+	size_t population_size = 1000;
 	size_t dimension = nbCities;
-	double alpha_mutate = 0.3;
-	double alpha_crossOver = 0.3;
+	double alpha_mutate = 0.8;
+	double alpha_crossOver = 0.8;
 	double alpha_removal =(alpha_mutate+alpha_crossOver)/(1+alpha_mutate+alpha_crossOver);
 	auto config = make_testEvolutionaryConfig(goalFunction, dimension);
 
@@ -118,8 +120,14 @@ int main()
 	config.setSelectionForRemoval(make_selection<ThresholdSelection<Individual>>(alpha_removal));
 
 	// run
+	auto start = std::chrono::steady_clock::now();
 	Darwin::GeneticAlgorithmLoop(config);
-    config.print();
-	config.printBest();
+	auto end = std::chrono::steady_clock::now();
+	std::cout << std::chrono::duration <double, std::micro>(end-start).count() << " microsec" << std::endl;
+	auto perfs = config.getPerfs();
+	for (auto const& p : perfs)
+		std::cout << p.first << ": " << std::chrono::duration <double, std::micro>(p.second).count() << " microsec" << std::endl;
+    //config.print();
+	//config.printBest();
     return 0;
 }

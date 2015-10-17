@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <iterator>
 #include <vector>
+#include <set>
 #include <cstddef>
 #include "ISelection.h"
 #include "../Random/Random.h"
@@ -18,15 +19,17 @@ namespace Darwin
 		{
 			size_t threshold = static_cast<size_t>(threshold_ratio*population.size());
 			auto rand = [&]() { return dist(gen); };
-			std::vector<size_t> indices;
+			//std::vector<size_t> indices;
+			std::set<size_t> tmp;
 
-			while ( indices.size() < threshold )
+			while ( tmp.size() < threshold )
 			{
-				indices.push_back(rand());
+				tmp.insert(rand());
+				/*indices.push_back(rand());
 				sort( std::begin(indices), std::end(indices) );
-				indices.erase( unique( std::begin(indices), std::end(indices) ), std::end(indices) );
+				indices.erase( unique( std::begin(indices), std::end(indices) ), std::end(indices) );*/
 			}
-			return indices;
+			return std::vector<size_t>(tmp.begin(), tmp.end()); //indices;
 		}
 	private:
 		double const threshold_ratio;
