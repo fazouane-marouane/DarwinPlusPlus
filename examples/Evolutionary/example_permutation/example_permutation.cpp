@@ -11,7 +11,7 @@
 #include <Selection/UniformSelection.h>
 #include <modules/Memoization.h>
 #include <chrono>
-#if defined(_OPENMP)
+#if defined(DARWIN_OPENMP)
 #include <omp.h>
 #endif
 #include <sstream>

@@ -8,7 +8,7 @@
 #include <map>
 #include <thread>
 #include <chrono>
-#if defined(_OPENMP)
+#if defined(DARWIN_OPENMP)
 #include <omp.h>
 #endif
 

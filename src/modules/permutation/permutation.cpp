@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <iterator>
 #include <cassert>
-#if defined(_OPENMP)
+#if defined(DARWIN_OPENMP)
 #include <omp.h>
 #endif
 
