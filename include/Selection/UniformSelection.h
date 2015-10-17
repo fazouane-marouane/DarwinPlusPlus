@@ -26,7 +26,6 @@ namespace Darwin
 			size_t index = 0U;
 			std::generate(std::begin(v), std::end(v), [&index] {return index++; });
 
-			//#pragma omp parallel for
 			while( indices.size() < threshold)
 			{
 				size_t i = rand();

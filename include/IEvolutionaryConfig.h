@@ -8,9 +8,14 @@
 #include <map>
 #include <thread>
 #include <chrono>
+#if defined(_OPENMP)
 #include <omp.h>
+#endif
+
 #include "Selection/ISelection.h"
+
 #include "Initialization/IInitialization.h"
+
 #include "datastructures/algorithms.h"
 
 namespace Darwin
@@ -85,19 +90,26 @@ namespace Darwin
 				population_type newIndividuals;
 				// Mutation
 				population_type mutants;
-				std::vector<std::thread> tasks;
-				tasks.push_back(std::thread([this, &newIndividuals]() { newIndividuals = crossOver(population, (*selectForCrossOver)(population)); }));
-				tasks.push_back(std::thread([this, &mutants]() { mutants = mutate(population, (*selectForMutation)(population)); }));
-				for (auto& t : tasks)
-					t.join();
+				{
+					std::thread tasks[] = {
+						std::thread([this, &newIndividuals]() { newIndividuals = crossOver(population, (*selectForCrossOver)(population)); }),
+						std::thread([this, &mutants]() { mutants = mutate(population, (*selectForMutation)(population)); })
+					};
+					for (auto& t : tasks)
+						t.join();
+				}
 				auto endCompute = std::chrono::steady_clock::now();
 				// Merge these new individuals into the original population
 				Darwin::utility::merge(population, std::move(newIndividuals), std::move(mutants));
 				auto endMerge = std::chrono::steady_clock::now();
 				// sort
-				#pragma omp parallel for
-				for (auto itr = population.begin(); itr < population.end(); ++itr)
-					(void)goalFunction(*itr);
+				//#pragma omp parallel
+				{
+					size_t N = population.size();
+					for (int itr = 0; itr < N; itr++)
+						(void)goalFunction(population.at(itr));
+				}
+				auto endComputeGoalFunc = std::chrono::steady_clock::now();
 				std::sort(population.begin(), population.end(),
 					[this](Individual& lhs, Individual& rhs)
 					{
@@ -105,35 +117,61 @@ namespace Darwin
 					});
 				auto endSort = std::chrono::steady_clock::now();
 				// Natural selection
-				Darwin::utility::remove(population, (*selectForRemoval)(population));
+				auto toBeRemoved = (*selectForRemoval)(population);
+				auto endSelectRemove = std::chrono::steady_clock::now();
+				Darwin::utility::remove(population, std::move(toBeRemoved));
 				auto endBreed = std::chrono::steady_clock::now();
 				perfs["Compute"] += endCompute - startCompute;
 				perfs["Merge"] += endMerge - endCompute;
-				perfs["Sort"] += endSort - endMerge;
-				perfs["Remove"] += endBreed - endSort;
+				perfs["GoalFunc"] += endComputeGoalFunc - endMerge;
+				perfs["Sort"] += endSort - endComputeGoalFunc;
+				perfs["SelectRemove"] += endSelectRemove - endSort;
+				perfs["Remove"] += endBreed - endSelectRemove;
 				return *this;
 			}
 
 			virtual population_type crossOver(population_type& population, indices const & parents)
 			{
 				std::vector<Individual> population_;
-				#pragma omp parallel for
-				for(auto itr = std::begin(parents); itr != std::end(parents); ++itr)
+				int N = parents.size();
+				population_.reserve(N);
+				#pragma omp parallel
 				{
-					auto next_itr = std::next(itr);
-					if (next_itr == std::end(parents))
-						next_itr = std::begin(parents);
-					population_.push_back(crossOver(population.at(*itr), population.at(*next_itr)));
+					std::vector<Individual> population_private;
+					#pragma omp for
+					for (auto itr = 0; itr < N; itr++)
+					{
+						auto next_itr = (itr + 1) % N;
+						population_private.push_back(crossOver(population.at(parents.at(itr)), population.at(parents.at(next_itr))));
+					}
+					#pragma omp critical
+					{
+						Darwin::utility::merge(population_, population_private);
+					}
 				}
+
+				
 				return population_;
 			}
 
 			virtual population_type mutate(population_type& population, indices const & mutants)
 			{
 				Population population_;
-				#pragma omp parallel for
-				for (auto itr = mutants.begin(); itr < mutants.end(); ++itr)
-					population_.push_back(mutate(population.at(*itr)));
+				size_t N = mutants.size();
+				population_.reserve(N);
+				#pragma omp parallel
+				{
+					std::vector<Individual> population_private;
+					#pragma omp for
+					for (auto itr = 0; itr < N; itr++)
+					{
+						population_private.push_back(mutate(population.at(mutants.at(itr))));
+					}
+					#pragma omp critical
+					{
+						Darwin::utility::merge(population_, population_private);
+					}
+				}
 				return population_;
 			}
 

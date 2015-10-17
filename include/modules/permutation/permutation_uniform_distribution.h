@@ -31,7 +31,7 @@ namespace Darwin
 				std::vector<size_t> positions(size);
 
 				#pragma omp parallel for
-				for (size_t itr = 0; itr < size; ++itr)
+				for (int itr = 0; itr < size; itr++)
 				{
 					positions[itr] = myDist(gen, decltype(myDist)::param_type(0, size - 1 - itr));;
 				}

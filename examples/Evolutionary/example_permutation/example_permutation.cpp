@@ -11,7 +11,9 @@
 #include <Selection/UniformSelection.h>
 #include <modules/Memoization.h>
 #include <chrono>
+#if defined(_OPENMP)
 #include <omp.h>
+#endif
 #include <sstream>
 
 namespace Darwin
@@ -89,8 +91,8 @@ public :
 		auto& population = this->getPopulation();
 		auto best = *std::max_element(std::begin(population), std::end(population), [&goalFunction](auto lhs, auto rhs)
 		{ return goalFunction(lhs) < goalFunction(rhs); });
-		os << "count: " << counter << " -- best score: " << goalFunction(best) << std::endl;
-		os << " --best :"<<std::endl;// << best << std::endl;
+		os <<"cities: "<<nbcities<< " count: " << counter << " -- best score: " << goalFunction(best) << std::endl;
+		/*os << " --best :"<<std::endl;// << best << std::endl;
 		
 		os << "{";
 		for(auto c: best.get().get())
@@ -100,7 +102,7 @@ public :
 		}
 		auto coordinates = getCoordonnate(best.get().get()[0], nbcities);
 		os << "{" << coordinates(0) << ", " << coordinates(1) << "}";
-		os << "}" << std::endl;
+		os << "}" << std::endl;*/
 	}
 
 private:
@@ -132,7 +134,6 @@ void testCase(int nbCities, size_t population_size, double alpha_mutate, double 
 	std::ostringstream strBuffer;
 	using namespace Darwin;
 	// Data
-	int nbCities = 9;
     MatrixXd cityMap(nbCities, nbCities);
 	for (int i = 0; i < nbCities; i++)
 		for (int j = 0; j < nbCities; j++){
@@ -141,13 +142,14 @@ void testCase(int nbCities, size_t population_size, double alpha_mutate, double 
 			cityMap(i, j) = distance2D(city_i, city_j);
 		}
 
+	std::cout << "==OK==" << std::endl;
 	//strBuffer << cityMap << std::endl;
 
 	auto goalFunction = [&cityMap, &nbCities](Darwin::Permutation const& individual)
 	{
 		double s = 0;
-		#pragma omp parallel for
-		for (size_t i = 0; i < individual.get().size()-1; i++)
+		#pragma omp parallel for reduction(-:s)
+		for (int i = 0; i < individual.get().size()-1; i++)
 		{
 			s -= cityMap(individual.get().at(i), individual.get().at(i+1));
 		}
@@ -175,15 +177,22 @@ void testCase(int nbCities, size_t population_size, double alpha_mutate, double 
 		strBuffer << p.first << ": " << std::chrono::duration <double, std::micro>(p.second).count() << " microsec" << std::endl;
     //config.print();
 	config.printBest(nbCities, strBuffer);
-	std::cout << strBuffer.str();
+	std::cout << strBuffer.str()<<std::endl;
 }
 
+#include <future>
 
 int main()
 {
-	std::thread runners[] = { std::thread(testCase, 100, 1000, 1.0, 1.0),
-		std::thread(testCase, 9, 100, 0.4, 0.6) };
+	std::future<void> runners[] = {
+		std::async(std::launch::deferred, testCase, 3*3, 100, 0.5, 0.3),
+		std::async(std::launch::deferred, testCase, 10 * 10, 1000, 0.8, 0.8),
+		std::async(std::launch::deferred, testCase, 20 * 20, 1000, 0.8, 0.8),
+		std::async(std::launch::deferred, testCase, 30 * 30, 1000, 0.8, 0.8),
+		std::async(std::launch::deferred, testCase, 50 * 50, 1000, 0.9, 0.9),
+		std::async(std::launch::deferred, testCase, 50 * 50, 10000, 0.9, 0.9),
+		std::async(std::launch::deferred, testCase, 100 * 100, 1000, 1.0, 1.0) };
 
-	for (auto& r: runners)
-		r.join();
+	for (auto& r : runners)
+		r.get();
 }

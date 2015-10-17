@@ -6,7 +6,9 @@
 #include <algorithm>
 #include <iterator>
 #include <cassert>
+#if defined(_OPENMP)
 #include <omp.h>
+#endif
 
 namespace Darwin
 {
@@ -48,7 +50,7 @@ namespace Darwin
 	{
 		std::vector<size_t> result(_internal.size());
 		#pragma omp parallel for
-		for (size_t itr = 0; itr < size; ++itr)
+		for (int itr = 0; itr < size; ++itr)
 		{
 			result[_internal[itr]] = itr;
 		}
@@ -60,7 +62,7 @@ namespace Darwin
 	{
 		std::vector<size_t> result(_internal.size());
 		#pragma omp parallel for
-		for (size_t itr = 0; itr < size; ++itr)
+		for (int itr = 0; itr < size; ++itr)
 		{
 			result[size-1-itr] = _internal[itr];
 		}
@@ -84,7 +86,7 @@ namespace Darwin
 			return;
 		using std::swap;
 		#pragma omp parallel for
-		for (size_t itr = 0; itr <= (last-first)/2; ++itr)
+		for (int itr = 0; itr <= (last-first)/2; ++itr)
 			swap(_internal[first+itr], _internal[last-itr]);
 	}
 
@@ -92,7 +94,7 @@ namespace Darwin
 	{
 		std::vector<size_t> result(_internal);
 		#pragma omp parallel for
-		for (size_t itr = 0; itr < size; ++itr)
+		for (int itr = 0; itr < size; ++itr)
 		{
 			result[itr] = _internal[other._internal[itr]];
 		}

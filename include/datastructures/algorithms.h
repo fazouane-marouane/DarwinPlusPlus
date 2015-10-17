@@ -1,6 +1,9 @@
 #pragma once
 #include <iterator>
 #include <memory>
+#if defined(_OPENMP)
+#include <omp.h>
+#endif
 
 namespace Darwin
 {
@@ -28,9 +31,35 @@ namespace Darwin
 		template<class VectDest, class Indx>
 		inline void remove(VectDest& dest, Indx&& toBeRemoved)
 		{
+			VectDest tmp;
+			tmp.reserve(dest.size() - toBeRemoved.size());
+			const size_t N = dest.size();
+			#pragma omp parallel
+			{
+				std::vector<Individual> tmp_private;
+				#pragma omp for
+				for (int i = 0; i < N; i++)
+				{
+					bool removeIt = false;
+					for (auto v : toBeRemoved)
+						if (v == i) {
+							removeIt = true;
+							break;
+						}
+					if (!removeIt)
+						tmp_private.push_back(std::move(dest[i]));
+				}
+				#pragma omp critical
+				{
+					Darwin::utility::merge(tmp, tmp_private);
+				}
+			}
+			
+			dest = std::move(tmp);
 			// check that toBeRemoved is sorted
+			/*
 			for(auto v: toBeRemoved)
-				dest.erase(dest.begin()+v);
+				dest.erase(dest.begin()+v);*/
 		}
 	}
 }
