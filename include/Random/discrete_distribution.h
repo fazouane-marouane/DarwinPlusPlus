@@ -55,16 +55,22 @@ namespace Darwin
 
 			void init_with_positive_values(std::vector<_Double> vect)
 			{
+				_initialized = true;
+				upper_limits.erase(std::begin(upper_limits), std::end(upper_limits));
 				_Double sum = 0;
 				for (auto v : vect)
 				{
 					assert(v >= 0.0);
-					sum += vect;
+					sum += v;
 				}
 				assert(sum > 0.0);
-				for (auto& v : vect)
-					v /= sum;
-				init(vect);
+				_Double cumsum = 0;
+				for (auto p : vect)
+				{
+					cumsum += p;
+					upper_limits.push_back(cumsum/sum);
+				}
+				assert(std::abs(cumsum/sum - 1.0) < std::numeric_limits<_Double>::epsilon());
 			}
 
 			void init_with_cumulated_sums(std::vector<_Double> const& vect_sums)

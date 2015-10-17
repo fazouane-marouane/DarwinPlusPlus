@@ -9,6 +9,7 @@
 #include <Initialization/RandomInitialization.h>
 #include <Selection/ThresholdSelection.h>
 #include <Selection/UniformSelection.h>
+#include <Selection/PSelection.h>
 #include <modules/Memoization.h>
 #include <chrono>
 #if defined(DARWIN_OPENMP)
@@ -145,7 +146,7 @@ void testCase(int nbCities, size_t population_size, double alpha_mutate, double 
 	std::cout << "==OK==" << std::endl;
 	//strBuffer << cityMap << std::endl;
 
-	auto goalFunction = [&cityMap, &nbCities](Darwin::Permutation const& individual)
+	auto goalFunction = liftMemoized([&cityMap, &nbCities](Darwin::Permutation const& individual)
 	{
 		double s = 0;
 		#pragma omp parallel for reduction(-:s)
@@ -154,18 +155,19 @@ void testCase(int nbCities, size_t population_size, double alpha_mutate, double 
 			s -= cityMap(individual.get().at(i), individual.get().at(i+1));
 		}
 		return s;
-	};
+	});
 	// Problem solving
 	size_t dimension = nbCities;
 
 	double alpha_removal =(alpha_mutate+alpha_crossOver)/(1+alpha_mutate+alpha_crossOver);
-	auto config = make_testEvolutionaryConfig(liftMemoized(goalFunction), dimension);
+	auto config = make_testEvolutionaryConfig(goalFunction, dimension);
 
 	// settings
 	config.setInitializer(make_initialization<UniformInitialization<Individual>>(population_size, dimension));
 	config.setSelectionForCrossOver(make_selection<UniformSelection<Individual>>(alpha_crossOver));
 	config.setSelectionForMutation(make_selection<UniformSelection<Individual>>(alpha_mutate));
 	config.setSelectionForRemoval(make_selection<ThresholdSelection<Individual>>(alpha_removal));
+
 
 	// run
 	auto start = std::chrono::steady_clock::now();
