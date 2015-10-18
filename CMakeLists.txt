@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 include(CheckCXXCompilerFlag)
-project(DarwinPP CXX)
+project(DarwinPP C CXX)
 
 # Special output directories
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -38,7 +38,7 @@ else()
   else()
       message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
   endif(COMPILER_SUPPORTS_CXX17)
-
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
   if(CHECK_CXX_COMPILER_USED2)
   elseif("${CMAKE_CXX_COMPILER_ID}x" MATCHES "Clangx")
     # using Clang
@@ -50,6 +50,12 @@ else()
   endif(CHECK_CXX_COMPILER_USED2)
 endif(CHECK_CXX_COMPILER_USED1)
 
+find_package(OpenMP)
+if (OPENMP_FOUND)
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+  add_definitions (-DDARWIN_OPENMP)
+endif()
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/" ${CMAKE_MODULE_PATH})
 #target_compile_features(DarwinPP PRIVATE cxx_generic_lambdas cxx_constexpr)

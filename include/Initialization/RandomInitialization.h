@@ -17,6 +17,7 @@ namespace Darwin
 
 		std::size_t operator()(Population& population)
 		{
+			population.reserve(target_population_size);
 			while ( population.size() <= target_population_size )
 				population.push_back(dist(gen));
 			return target_population_size;

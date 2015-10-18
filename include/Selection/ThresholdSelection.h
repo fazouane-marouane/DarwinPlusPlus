@@ -13,10 +13,10 @@ namespace Darwin
 		explicit ThresholdSelection(double _threshold): threshold_ratio(_threshold){}
 		Indices operator()(Population& population)
 		{
-			size_t index = static_cast<size_t>(threshold_ratio*population.size());
+			size_t index = std::min(static_cast<size_t>(threshold_ratio*population.size()), population.size());
 			Indices indices(index);
 			
-			std::generate(std::begin(indices), std::end(indices), [&index]() { return --index;});
+			std::generate(std::begin(indices), std::end(indices), [i = index]() mutable { return --i;});
 			return indices;
 		}
 	private:

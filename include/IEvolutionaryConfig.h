@@ -5,8 +5,17 @@
 #include <functional> // std::reference_wrapper
 #include <string>
 #include <algorithm>
+#include <map>
+#include <thread>
+#include <chrono>
+#if defined(DARWIN_OPENMP)
+#include <omp.h>
+#endif
+
 #include "Selection/ISelection.h"
+
 #include "Initialization/IInitialization.h"
+
 #include "datastructures/algorithms.h"
 
 namespace Darwin
@@ -76,41 +85,93 @@ namespace Darwin
 
 			virtual IEvolutionaryConfig& breed()
 			{
+				auto startCompute = std::chrono::steady_clock::now();
 				// Cross Over
-				auto newIndividuals = crossOver(population, (*selectForCrossOver)(population));
+				population_type newIndividuals;
 				// Mutation
-				auto mutants = mutate(population, (*selectForMutation)(population));
+				population_type mutants;
+				{
+					std::thread tasks[] = {
+						std::thread([this, &newIndividuals]() { newIndividuals = crossOver(population, (*selectForCrossOver)(population)); }),
+						std::thread([this, &mutants]() { mutants = mutate(population, (*selectForMutation)(population)); })
+					};
+					for (auto& t : tasks)
+						t.join();
+				}
+				auto endCompute = std::chrono::steady_clock::now();
 				// Merge these new individuals into the original population
-				Darwin::utility::merge(population, newIndividuals, mutants);
+				Darwin::utility::merge(population, std::move(newIndividuals), std::move(mutants));
+				auto endMerge = std::chrono::steady_clock::now();
 				// sort
+				//#pragma omp parallel
+				{
+					size_t N = population.size();
+					for (int itr = 0; itr < N; itr++)
+						(void)goalFunction(population.at(itr));
+				}
+				auto endComputeGoalFunc = std::chrono::steady_clock::now();
 				std::sort(population.begin(), population.end(),
 					[this](Individual& lhs, Individual& rhs)
 					{
 						return goalFunction(lhs) < goalFunction(rhs);
 					});
+				auto endSort = std::chrono::steady_clock::now();
 				// Natural selection
-				Darwin::utility::remove(population, (*selectForRemoval)(population));
+				auto toBeRemoved = (*selectForRemoval)(population);
+				auto endSelectRemove = std::chrono::steady_clock::now();
+				Darwin::utility::remove(population, std::move(toBeRemoved));
+				auto endBreed = std::chrono::steady_clock::now();
+				perfs["Compute"] += endCompute - startCompute;
+				perfs["Merge"] += endMerge - endCompute;
+				perfs["GoalFunc"] += endComputeGoalFunc - endMerge;
+				perfs["Sort"] += endSort - endComputeGoalFunc;
+				perfs["SelectRemove"] += endSelectRemove - endSort;
+				perfs["Remove"] += endBreed - endSelectRemove;
 				return *this;
 			}
 
 			virtual population_type crossOver(population_type& population, indices const & parents)
 			{
 				std::vector<Individual> population_;
-				for(auto itr = std::begin(parents); itr != std::end(parents); ++itr)
+				int N = parents.size();
+				population_.reserve(N);
+				#pragma omp parallel
 				{
-					auto next_itr = std::next(itr);
-					if (next_itr == std::end(parents))
-						next_itr = std::begin(parents);
-					population_.push_back(crossOver(population.at(*itr), population.at(*next_itr)));
+					std::vector<Individual> population_private;
+					#pragma omp for
+					for (auto itr = 0; itr < N; itr++)
+					{
+						auto next_itr = (itr + 1) % N;
+						population_private.push_back(crossOver(population.at(parents.at(itr)), population.at(parents.at(next_itr))));
+					}
+					#pragma omp critical
+					{
+						Darwin::utility::merge(population_, population_private);
+					}
 				}
+
+				
 				return population_;
 			}
 
 			virtual population_type mutate(population_type& population, indices const & mutants)
 			{
 				Population population_;
-				for (auto m : mutants)
-					population_.push_back(mutate(population.at(m)));
+				size_t N = mutants.size();
+				population_.reserve(N);
+				#pragma omp parallel
+				{
+					std::vector<Individual> population_private;
+					#pragma omp for
+					for (auto itr = 0; itr < N; itr++)
+					{
+						population_private.push_back(mutate(population.at(mutants.at(itr))));
+					}
+					#pragma omp critical
+					{
+						Darwin::utility::merge(population_, population_private);
+					}
+				}
 				return population_;
 			}
 
@@ -140,6 +201,11 @@ namespace Darwin
 				return goalFunction;
 			}
 
+			virtual std::map<std::string, std::chrono::duration<double, std::nano>> const& getPerfs() const
+			{
+				return perfs;
+			}
+
 		protected:
 			population_type population;
 			GoalFunction goalFunction;
@@ -147,6 +213,8 @@ namespace Darwin
 			selection_type selectForCrossOver;
 			selection_type selectForMutation;
 			selection_type selectForRemoval;
+
+			std::map<std::string, std::chrono::duration<double, std::nano>> perfs;
 		};
 	}
 }

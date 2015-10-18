@@ -14,11 +14,11 @@ namespace Darwin
 		class uniform_distribution<Permutation>
 		{
 		public:
-			uniform_distribution(size_t _size): size(_size), dists(_size), simple_permutation(_size)
+			uniform_distribution(size_t _size): size(_size), /*dists(_size),*/ simple_permutation(_size)
 			{
 				assert(size > 0);
-				for (size_t itr = 0; itr < size; ++itr)
-					dists[itr] = uniform_distribution<size_t>(0, size-1-itr);
+				/*for (size_t itr = 0; itr < size; ++itr)
+					dists[itr] = uniform_distribution<size_t>(0, size-1-itr);*/
 				size_t n = 0U;
 				std::generate(std::begin(simple_permutation), std::end(simple_permutation), [&n] { return n++; });
 			}
@@ -26,21 +26,28 @@ namespace Darwin
 			template<class Generator>
 			Permutation operator()(Generator& gen)
 			{
-				std::vector<size_t> result;
-				result.reserve(size);
-				auto permutation = simple_permutation;
-				for(size_t position = 0; position < size; ++position)
+				std::vector<size_t> result(size);
+				std::vector<size_t> permutation = simple_permutation;
+				std::vector<size_t> positions(size);
+
+				#pragma omp parallel for
+				for (int itr = 0; itr < size; itr++)
 				{
-					auto pos = dists[position](gen);
-					auto itr = permutation.begin() + pos;
-					result.push_back(*itr);
+					positions[itr] = myDist(gen, decltype(myDist)::param_type(0, size - 1 - itr));;
+				}
+
+				for (size_t pos = 0; pos < size; ++pos)
+				{
+					auto itr = permutation.begin() + positions[pos];
+					result[pos] =*itr;
 					permutation.erase(itr);
 				}
-				return Permutation(result);
+				return Permutation(std::move(result));
 			}
 		private:
 			size_t const size;
-			std::vector<uniform_distribution<size_t>> dists;
+			//std::vector<uniform_distribution<size_t>> dists;
+			uniform_distribution<size_t> myDist;
 			std::vector<size_t> simple_permutation;
 		};
 	}
