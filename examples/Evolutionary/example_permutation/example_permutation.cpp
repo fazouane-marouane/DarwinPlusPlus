@@ -9,6 +9,7 @@
 #include <Initialization/RandomInitialization.h>
 #include <Selection/ThresholdSelection.h>
 #include <Selection/UniformSelection.h>
+#include <Selection/PSelection.h>
 
 using namespace Eigen;
 using Individual = Darwin::Permutation;
@@ -110,12 +111,13 @@ int main()
 	double alpha_crossOver = 0.3;
 	double alpha_removal =(alpha_mutate+alpha_crossOver)/(1+alpha_mutate+alpha_crossOver);
 	auto config = make_testEvolutionaryConfig(goalFunction, dimension);
+    double proportion = 0.7;
 
 	// settings
 	config.setInitializer(make_initialization<UniformInitialization<Individual>>(population_size, dimension));
 	config.setSelectionForCrossOver(make_selection<UniformSelection<Individual>>(alpha_crossOver, population_size));
 	config.setSelectionForMutation(make_selection<UniformSelection<Individual>>(alpha_mutate, population_size));
-	config.setSelectionForRemoval(make_selection<ThresholdSelection<Individual>>(alpha_removal));
+	config.setSelectionForRemoval(make_selection<PSelection<Individual, decltype(goalFunction)>>(proportion,goalFunction));
 
 	// run
 	Darwin::GeneticAlgorithmLoop(config);
