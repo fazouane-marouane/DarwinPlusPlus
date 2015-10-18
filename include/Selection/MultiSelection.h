@@ -2,26 +2,31 @@
 #include <map>
 #include <string>
 #include <memory>
+#include <vector>
 #include "ISelection.h"
 
 namespace Darwin
 {
-	template<class Population, class Indices>
+	template<class Population, class Indices = std::vector<size_t>>
 	class MultiSelection: public Interfaces::ISelection<Population, Indices>
 	{
 		using base = Interfaces::ISelection<Population, Indices>;
 		using Map=std::map<std::string, std::unique_ptr<base>>;
 	public:
-		MultiSelection(Map&& _options=Map()): options(_options){}
+		MultiSelection(Map&& _options = Map()): options(std::move(_options)){}
+		MultiSelection(MultiSelection const&) = delete;
+		MultiSelection(MultiSelection&&) = default;
+		MultiSelection& operator=(MultiSelection const&) = delete;
+		MultiSelection& operator=(MultiSelection&&) = default;
 
 		void AddOption(std::pair<std::string, std::unique_ptr<base>>&& option)
 		{
-			options.insert(option);
+			options.insert(std::move(option));
 		}
 
 		void AddOption(std::string name, std::unique_ptr<base>&& option)
 		{
-			AddOption(std::make_pair(name, option));
+			options.insert(std::make_pair(name, std::move(option)));
 		}
 
 		void setDefault(std::string _default)
@@ -33,13 +38,18 @@ namespace Darwin
 		{
 			return default_option;
 		}
+		
+		Indices operator()(Population& population)
+		{
+			return (this->operator())(population, default_option);
+		}
 
-		Indices operator()(Population& population, std::string method = default_option)
+		Indices operator()(Population& population, std::string method)
 		{
 			auto itr = options.find(method);
 			if(itr != std::end(options))
 			{
-				return itr->second();
+				return (*(itr->second.get()))(population);
 			}
 			else
 				throw std::runtime_error("There is no selection method called: "+method);
@@ -64,6 +74,6 @@ namespace Darwin
 	template<class Option, class... Args>
 	std::pair<std::string, std::unique_ptr<Option>> make_selection_pair(std::string name, Args&&... args)
 	{
-		return std::make_pair(name, make_selection<Option>(std::forward<Args>(args)...));
+		return std::make_pair(name, std::move( make_selection<Option>(std::forward<Args>(args)...)));
 	}
 }
