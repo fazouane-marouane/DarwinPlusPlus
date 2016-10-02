@@ -9,8 +9,10 @@
 #include <Initialization/RandomInitialization.h>
 #include <Selection/ThresholdSelection.h>
 #include <Selection/UniformSelection.h>
+#include <Selection/PSelection.h>
 #include <modules/Memoization.h>
 #include <chrono>
+#include <Selection/MultiSelection.h>
 #if defined(DARWIN_OPENMP)
 #include <omp.h>
 #endif
@@ -129,7 +131,7 @@ double distance2D(size_t lhs, size_t rhs, size_t nbCities)
 
 #include <chrono>
 
-void testCase(int nbCities, size_t population_size, double alpha_mutate, double alpha_crossOver)
+void testCase(int nbCities, size_t population_size, double alpha_mutate, double alpha_crossOver, std::string removalMethod)
 {
 	std::ostringstream strBuffer;
 	using namespace Darwin;
@@ -145,7 +147,7 @@ void testCase(int nbCities, size_t population_size, double alpha_mutate, double 
 	std::cout << "==OK==" << std::endl;
 	//strBuffer << cityMap << std::endl;
 
-	auto goalFunction = [&cityMap, &nbCities](Darwin::Permutation const& individual)
+	auto goalFunction = liftMemoized([&cityMap, &nbCities](Darwin::Permutation const& individual)
 	{
 		double s = 0;
 		#pragma omp parallel for reduction(-:s)
@@ -154,18 +156,23 @@ void testCase(int nbCities, size_t population_size, double alpha_mutate, double 
 			s -= cityMap(individual.get().at(i), individual.get().at(i+1));
 		}
 		return s;
-	};
+	});
 	// Problem solving
 	size_t dimension = nbCities;
 
 	double alpha_removal =(alpha_mutate+alpha_crossOver)/(1+alpha_mutate+alpha_crossOver);
-	auto config = make_testEvolutionaryConfig(liftMemoized(goalFunction), dimension);
-
+	auto config = make_testEvolutionaryConfig(goalFunction, dimension);
+    double proportion = alpha_removal;
+    
 	// settings
 	config.setInitializer(make_initialization<UniformInitialization<Individual>>(population_size, dimension));
 	config.setSelectionForCrossOver(make_selection<UniformSelection<Individual>>(alpha_crossOver));
 	config.setSelectionForMutation(make_selection<UniformSelection<Individual>>(alpha_mutate));
-	config.setSelectionForRemoval(make_selection<ThresholdSelection<Individual>>(alpha_removal));
+    if (removalMethod == "uniform")
+        config.setSelectionForRemoval(make_selection<UniformSelection<Individual>>(alpha_removal));
+    if (removalMethod == "probabilist")
+        config.setSelectionForRemoval(make_selection<PSelection<Individual, decltype(goalFunction)>>(alpha_removal, goalFunction));
+    
 
 	// run
 	auto start = std::chrono::steady_clock::now();
@@ -184,14 +191,18 @@ void testCase(int nbCities, size_t population_size, double alpha_mutate, double 
 
 int main()
 {
-	std::future<void> runners[] = {
-		std::async(std::launch::deferred, testCase, 3*3, 100, 0.5, 0.3),
-		std::async(std::launch::deferred, testCase, 10 * 10, 1000, 0.8, 0.8),
-		std::async(std::launch::deferred, testCase, 20 * 20, 1000, 0.8, 0.8),
-		std::async(std::launch::deferred, testCase, 30 * 30, 1000, 0.8, 0.8),
-		std::async(std::launch::deferred, testCase, 50 * 50, 1000, 0.9, 0.9),
-		std::async(std::launch::deferred, testCase, 50 * 50, 10000, 0.9, 0.9),
-		std::async(std::launch::deferred, testCase, 100 * 100, 1000, 1.0, 1.0) };
+	// std::future<void> runners[] = {
+		// std::async(std::launch::deferred, testCase, 3*3, 100, 0.5, 0.3),
+		//std::async(std::launch::deferred, testCase, 10 * 10, 1000, 0.8, 0.8),
+		// std::async(std::launch::deferred, testCase, 20 * 20, 1000, 0.8, 0.8),
+		// std::async(std::launch::deferred, testCase, 30 * 30, 1000, 0.8, 0.8),
+		// std::async(std::launch::deferred, testCase, 50 * 50, 1000, 0.9, 0.9),
+		//std::async(std::launch::deferred, testCase, 50 * 50, 10000, 0.9, 0.9),
+        //std::async(std::launch::deferred, testCase, 100 * 100, 1000, 1.0, 1.0) };
+    
+    std::future<void> runners[] = {
+        std::async(std::launch::deferred, testCase, 10 * 10, 1000, 0.8, 0.8, "probabilist")
+    };
 
 	for (auto& r : runners)
 		r.get();
